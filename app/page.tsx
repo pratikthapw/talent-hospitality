@@ -1,19 +1,33 @@
-import { Button } from "@/components/ui/button"
+"use client"
+
+import { useState } from "react"
+import { Language } from "@/lib/translations"
+import { Navigation } from "@/components/sections/Navigation"
+import { Hero } from "@/components/sections/Hero"
+import { HowItWorks } from "@/components/sections/HowItWorks"
+import { FeaturesGrid } from "@/components/sections/FeaturesGrid"
+import { JobCategories } from "@/components/sections/JobCategories"
+import { SpotlightJobs } from "@/components/sections/SpotlightJobs"
+import { CTASection } from "@/components/sections/CTASection"
+import { Testimonials } from "@/components/sections/Testimonials"
+import { PricingTeaser } from "@/components/sections/PricingTeaser"
+import { Footer } from "@/components/sections/Footer"
 
 export default function Page() {
+  const [language, setLanguage] = useState<Language>("en")
+
   return (
-    <div className="flex min-h-svh p-6">
-      <div className="flex max-w-md min-w-0 flex-col gap-4 text-sm leading-loose">
-        <div>
-          <h1 className="font-medium">Project ready!</h1>
-          <p>You may now add components and start building.</p>
-          <p>We&apos;ve already added the button component for you.</p>
-          <Button className="mt-2">Button</Button>
-        </div>
-        <div className="font-mono text-xs text-muted-foreground">
-          (Press <kbd>d</kbd> to toggle dark mode)
-        </div>
-      </div>
-    </div>
+    <main className="w-full">
+      <Navigation language={language} onLanguageChange={setLanguage} />
+      <Hero language={language} />
+      <HowItWorks language={language} />
+      <FeaturesGrid language={language} />
+      <JobCategories language={language} />
+      <SpotlightJobs language={language} />
+      <CTASection language={language} />
+      <Testimonials language={language} />
+      <PricingTeaser language={language} />
+      <Footer language={language} />
+    </main>
   )
 }
