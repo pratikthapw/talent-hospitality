@@ -116,14 +116,6 @@
   --sidebar-ring: oklch(0.56 0.021 213.5);
 }
 
-:root {
-  --thp-charcoal: #1c1c1e;
-  --thp-gold: #c9952a;
-  --thp-ivory: #faf6ef;
-  --thp-terracotta: #c1440e;
-  --thp-sage: #8fa68e;
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;

@@ -24,12 +24,9 @@ export function JobCategories({ language }: JobCategoriesProps) {
   }
 
   return (
-    <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+    <section className="bg-background px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <h2
-          className="mb-12 text-center text-3xl font-bold sm:text-4xl"
-          style={{ color: "var(--thp-charcoal)" }}
-        >
+        <h2 className="mb-12 text-center text-3xl font-bold text-foreground sm:text-4xl">
           {language === "en"
             ? "Browse by Category"
             : "श्रेणी अनुसार ब्राउज गर्नुहोस्"}
@@ -38,30 +35,19 @@ export function JobCategories({ language }: JobCategoriesProps) {
         <div className="relative">
           <button
             onClick={() => scroll("left")}
-            className="absolute top-1/2 left-0 z-10 hidden -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full transition hover:opacity-70 sm:flex lg:-translate-x-12"
-            style={{ backgroundColor: "var(--thp-gold)" }}
+            className="absolute top-1/2 left-0 z-10 hidden -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-muted sm:flex lg:-translate-x-12"
           >
-            <HugeiconsIcon
-              icon={ArrowLeft01Icon}
-              className="size-6 text-white"
-            />
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="size-6" />
           </button>
 
           <div
             ref={scrollContainerRef}
             className="flex gap-4 overflow-x-auto pb-2"
-            style={{ scrollBehavior: "smooth" }}
           >
             {categories.map((category, index) => (
               <button
                 key={index}
-                className="shrink-0 rounded-full px-6 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-300 hover:scale-110"
-                style={{
-                  backgroundColor:
-                    index === 0 ? "var(--thp-gold)" : "var(--thp-ivory)",
-                  color: index === 0 ? "white" : "var(--thp-charcoal)",
-                  border: "2px solid var(--thp-gold)",
-                }}
+                className="shrink-0 rounded-full border-2 border-primary bg-primary px-6 py-3 text-sm font-semibold whitespace-nowrap text-primary-foreground transition-all duration-300 hover:scale-110"
               >
                 {category}
               </button>
@@ -70,13 +56,9 @@ export function JobCategories({ language }: JobCategoriesProps) {
 
           <button
             onClick={() => scroll("right")}
-            className="absolute top-1/2 right-0 z-10 hidden translate-x-4 -translate-y-1/2 items-center justify-center rounded-full transition hover:opacity-70 sm:flex lg:translate-x-12"
-            style={{ backgroundColor: "var(--thp-gold)" }}
+            className="absolute top-1/2 right-0 z-10 hidden translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-muted sm:flex lg:translate-x-12"
           >
-            <HugeiconsIcon
-              icon={ArrowRight01Icon}
-              className="size-6 text-white"
-            />
+            <HugeiconsIcon icon={ArrowRight01Icon} className="size-6" />
           </button>
         </div>
       </div>

@@ -14,40 +14,25 @@ export function Hero({ language }: HeroProps) {
   const t = translations[language].hero
 
   return (
-    <section
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden pt-20"
-      style={{ backgroundColor: "var(--thp-charcoal)" }}
-    >
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-foreground pt-20">
       <div className="absolute inset-0 opacity-20">
-        <SVGMountain className="size-full" color="var(--thp-gold)" />
+        <SVGMountain className="size-full" />
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-20 text-center sm:px-6 lg:px-8">
-        <h1 className="animate-fade-in-up mb-6 text-4xl font-bold sm:text-5xl lg:text-6xl">
-          <span style={{ color: "var(--thp-ivory)" }} className="block">
-            {t.headline}
-          </span>
+        <h1 className="animate-fade-in-up mb-6 text-4xl font-bold text-background sm:text-5xl lg:text-6xl">
+          <span className="block">{t.headline}</span>
         </h1>
 
-        <p
-          className="animate-fade-in-up mx-auto mb-8 max-w-2xl text-lg leading-relaxed sm:text-xl"
-          style={{
-            color: "var(--thp-ivory)",
-            animationDelay: "0.1s",
-          }}
-        >
+        <p className="animate-fade-in-up mx-auto mb-8 max-w-2xl text-lg leading-relaxed text-background sm:text-xl">
           {t.subheading}
         </p>
 
         <Button
           size="lg"
-          className="animate-fade-in-up rounded-lg px-8 py-3 text-lg font-bold text-white transition hover:opacity-90"
-          style={{
-            backgroundColor: "var(--thp-gold)",
-            animationDelay: "0.2s",
-          }}
+          className="animate-fade-in-up rounded-lg bg-primary px-8 py-3 text-lg font-bold text-primary-foreground transition hover:opacity-90"
         >
           {t.button}
         </Button>
@@ -56,22 +41,12 @@ export function Hero({ language }: HeroProps) {
           {t.stats.map((stat, index) => (
             <div
               key={index}
-              className="animate-fade-in-up rounded-xl p-4 backdrop-blur-md"
-              style={{
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-                animationDelay: `${0.3 + index * 0.1}s`,
-              }}
+              className="animate-fade-in-up rounded-xl bg-white/[0.08] p-4 backdrop-blur-md"
             >
-              <div
-                className="mb-2 text-2xl font-bold sm:text-3xl"
-                style={{ color: "var(--thp-gold)" }}
-              >
+              <div className="mb-2 text-2xl font-bold text-primary sm:text-3xl">
                 {stat.number}
               </div>
-              <div
-                className="text-xs sm:text-sm"
-                style={{ color: "var(--thp-ivory)", opacity: 0.8 }}
-              >
+              <div className="text-xs text-background/80 sm:text-sm">
                 {stat.label}
               </div>
             </div>
@@ -79,10 +54,7 @@ export function Hero({ language }: HeroProps) {
         </div>
       </div>
 
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"
-        style={{ color: "var(--thp-gold)" }}
-      >
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-primary">
         <HugeiconsIcon icon={ArrowDown01Icon} className="size-6" />
       </div>
     </section>

@@ -18,17 +18,13 @@ export function Footer({ language }: FooterProps) {
   return (
     <footer
       id="contact"
-      className="px-4 py-16 text-white sm:px-6 lg:px-8"
-      style={{ backgroundColor: "var(--thp-charcoal)" }}
+      className="bg-foreground px-4 py-16 text-white sm:px-6 lg:px-8"
     >
       <div className="mx-auto max-w-6xl">
         <div className="mb-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="mb-4 flex items-center gap-2">
-              <div
-                className="flex size-8 items-center justify-center rounded-lg text-sm font-bold"
-                style={{ backgroundColor: "var(--thp-gold)" }}
-              >
+              <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
                 THP
               </div>
               <span className="font-bold">THP</span>
@@ -40,9 +36,7 @@ export function Footer({ language }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold" style={{ color: "var(--thp-gold)" }}>
-              Company
-            </h4>
+            <h4 className="mb-4 font-bold text-primary">Company</h4>
             <ul className="flex flex-col gap-2 text-sm">
               <li>
                 <a
@@ -80,9 +74,7 @@ export function Footer({ language }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold" style={{ color: "var(--thp-gold)" }}>
-              Legal
-            </h4>
+            <h4 className="mb-4 font-bold text-primary">Legal</h4>
             <ul className="flex flex-col gap-2 text-sm">
               <li>
                 <a
@@ -104,9 +96,7 @@ export function Footer({ language }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold" style={{ color: "var(--thp-gold)" }}>
-              Support
-            </h4>
+            <h4 className="mb-4 font-bold text-primary">Support</h4>
             <ul className="flex flex-col gap-2 text-sm">
               <li>
                 <a
@@ -128,9 +118,7 @@ export function Footer({ language }: FooterProps) {
           </div>
 
           <div>
-            <h4 className="mb-4 font-bold" style={{ color: "var(--thp-gold)" }}>
-              {t.followUs}
-            </h4>
+            <h4 className="mb-4 font-bold text-primary">{t.followUs}</h4>
             <div className="flex gap-4">
               <a
                 href="#facebook"
@@ -154,7 +142,7 @@ export function Footer({ language }: FooterProps) {
           </div>
         </div>
 
-        <div className="border-t border-gray-700 pt-8 text-center text-sm opacity-75">
+        <div className="border-t border-border pt-8 text-center text-sm opacity-75">
           <p>© 2024 Talent Hospitality Platform. {t.copyright}</p>
         </div>
       </div>
