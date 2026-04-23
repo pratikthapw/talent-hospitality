@@ -1,10 +1,10 @@
 "use client"
 
 import { Language, translations } from "@/lib/translations"
-import { SVGMountain } from "@/components/SVGMountain"
 import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
+import heroImage from "@/public/hero-image.webp"
 
 interface HeroProps {
   language: Language
@@ -15,8 +15,9 @@ export function Hero({ language }: HeroProps) {
 
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-foreground pt-20">
-      <div className="absolute inset-0 opacity-20">
-        <SVGMountain className="size-full" />
+      <div className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={heroImage.src} alt="" className="size-full object-cover" />
       </div>
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
