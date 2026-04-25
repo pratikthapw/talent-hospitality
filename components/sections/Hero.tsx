@@ -1,18 +1,21 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { Language, translations } from "@/lib/translations"
-import { Button } from "@/components/ui/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
-import heroImage from "@/public/hero-image.webp"
+import Image from "next/image";
+
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import { Button } from "@/components/ui/button";
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
+import heroImage from "@/public/hero-image.webp";
 
 interface HeroProps {
-  language: Language
+  language: Language;
 }
 
 export function Hero({ language }: HeroProps) {
-  const t = translations[language].hero
+  const t = translations[language].hero;
 
   return (
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-foreground pt-20">
@@ -74,5 +77,5 @@ export function Hero({ language }: HeroProps) {
         <HugeiconsIcon icon={ArrowDown01Icon} className="size-6" />
       </div>
     </section>
-  )
+  );
 }

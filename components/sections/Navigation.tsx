@@ -1,23 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Language, translations } from "@/lib/translations"
-import { Button } from "@/components/ui/button"
-import { HugeiconsIcon } from "@hugeicons/react"
-import {
-  Menu02Icon,
-  Cancel01Icon,
-  Globe02Icon,
-} from "@hugeicons/core-free-icons"
+import { useState } from "react";
+
+import { Menu02Icon, Cancel01Icon, Globe02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import { Button } from "@/components/ui/button";
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface NavigationProps {
-  language: Language
-  onLanguageChange: (lang: Language) => void
+  language: Language;
+  onLanguageChange: (lang: Language) => void;
 }
 
 export function Navigation({ language, onLanguageChange }: NavigationProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const t = translations[language].nav
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const t = translations[language].nav;
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/95 backdrop-blur-md">
@@ -26,9 +25,7 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
           <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
             {t.logo}
           </div>
-          <span className="hidden text-xl font-bold text-foreground sm:inline">
-            THP
-          </span>
+          <span className="hidden text-xl font-bold text-foreground sm:inline">THP</span>
         </div>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -68,10 +65,7 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
             className="p-2 text-foreground md:hidden"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <HugeiconsIcon
-              icon={isMenuOpen ? Cancel01Icon : Menu02Icon}
-              className="size-6"
-            />
+            <HugeiconsIcon icon={isMenuOpen ? Cancel01Icon : Menu02Icon} className="size-6" />
           </button>
         </div>
 
@@ -92,10 +86,7 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
                   {link.label}
                 </a>
               ))}
-              <Button
-                size="lg"
-                className="w-full bg-primary font-medium text-primary-foreground"
-              >
+              <Button size="lg" className="w-full bg-primary font-medium text-primary-foreground">
                 {t.postJob}
               </Button>
             </div>
@@ -103,5 +94,5 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
         )}
       </nav>
     </header>
-  )
+  );
 }

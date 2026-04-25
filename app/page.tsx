@@ -1,20 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Language } from "@/lib/translations"
-import { Navigation } from "@/components/sections/Navigation"
-import { Hero } from "@/components/sections/Hero"
-import { HowItWorks } from "@/components/sections/HowItWorks"
-import { FeaturesGrid } from "@/components/sections/FeaturesGrid"
-import { JobCategories } from "@/components/sections/JobCategories"
-import { SpotlightJobs } from "@/components/sections/SpotlightJobs"
-import { CTASection } from "@/components/sections/CTASection"
-import { Testimonials } from "@/components/sections/Testimonials"
-import { PricingTeaser } from "@/components/sections/PricingTeaser"
-import { Footer } from "@/components/sections/Footer"
+import { useState } from "react";
+
+import { CTASection } from "@/components/sections/CTASection";
+import { FeaturesGrid } from "@/components/sections/FeaturesGrid";
+import { Footer } from "@/components/sections/Footer";
+import { Hero } from "@/components/sections/Hero";
+import { HowItWorks } from "@/components/sections/HowItWorks";
+import { JobCategories } from "@/components/sections/JobCategories";
+import { Navigation } from "@/components/sections/Navigation";
+import { PricingTeaser } from "@/components/sections/PricingTeaser";
+import { SpotlightJobs } from "@/components/sections/SpotlightJobs";
+import { Testimonials } from "@/components/sections/Testimonials";
+import type { Language } from "@/lib/translations";
 
 export default function Page() {
-  const [language, setLanguage] = useState<Language>("en")
+  const [language, setLanguage] = useState<Language>("en");
 
   return (
     <main className="w-full">
@@ -29,5 +30,5 @@ export default function Page() {
       <PricingTeaser language={language} />
       <Footer language={language} />
     </main>
-  )
+  );
 }

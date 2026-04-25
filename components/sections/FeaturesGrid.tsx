@@ -1,7 +1,5 @@
-"use client"
+"use client";
 
-import { Language, translations } from "@/lib/translations"
-import { HugeiconsIcon } from "@hugeicons/react"
 import {
   CheckmarkBadge01Icon,
   SmileIcon,
@@ -9,10 +7,14 @@ import {
   Shield01Icon,
   SmartPhone01Icon,
   HeadphonesIcon,
-} from "@hugeicons/core-free-icons"
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface FeaturesGridProps {
-  language: Language
+  language: Language;
 }
 
 const featureIcons = [
@@ -22,10 +24,10 @@ const featureIcons = [
   Shield01Icon,
   SmartPhone01Icon,
   HeadphonesIcon,
-]
+];
 
 export function FeaturesGrid({ language }: FeaturesGridProps) {
-  const t = translations[language].features
+  const t = translations[language].features;
 
   return (
     <section className="bg-card px-4 py-20 sm:px-6 lg:px-8">
@@ -44,17 +46,13 @@ export function FeaturesGrid({ language }: FeaturesGridProps) {
                 <HugeiconsIcon icon={featureIcons[index]} className="size-6" />
               </div>
 
-              <h3 className="mb-3 text-xl font-bold text-foreground">
-                {feature.title}
-              </h3>
+              <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
 
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }

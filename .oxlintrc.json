@@ -1,0 +1,364 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "eslint",
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "jsdoc",
+    "node",
+    "promise",
+    "react",
+    "react-perf",
+    "jsx-a11y"
+  ],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "options": {
+    "typeAware": true
+  },
+  "categories": {
+    "correctness": "error",
+    "perf": "error",
+    "restriction": "error",
+    "suspicious": "error",
+    "pedantic": "error",
+    "style": "error"
+  },
+  "settings": {
+    "jsx-a11y": {
+      "components": {
+        "FieldLabel": "label",
+        "Input": "input",
+        "Textarea": "textarea"
+      }
+    }
+  },
+  "rules": {
+    // =============================================================================
+    // JSX A11Y RULES
+    // =============================================================================
+    "jsx-a11y/alt-text": "error",
+    "jsx-a11y/no-autofocus": [
+      "error",
+      {
+        "ignoreNonDOM": true
+      }
+    ],
+    "jsx-a11y/anchor-has-content": "error",
+    "jsx-a11y/anchor-is-valid": [
+      "error",
+      {
+        "aspects": ["noHref", "invalidHref"]
+      }
+    ],
+    "jsx-a11y/aria-activedescendant-has-tabindex": "error",
+    "jsx-a11y/aria-props": "error",
+    "jsx-a11y/aria-proptypes": "error",
+    "jsx-a11y/aria-role": [
+      "error",
+      {
+        "ignoreNonDOM": true
+      }
+    ],
+    "jsx-a11y/aria-unsupported-elements": "error",
+    "jsx-a11y/heading-has-content": "error",
+    "jsx-a11y/iframe-has-title": "error",
+    "jsx-a11y/img-redundant-alt": "error",
+    "jsx-a11y/no-access-key": "error",
+    "jsx-a11y/no-distracting-elements": "error",
+    "jsx-a11y/no-redundant-roles": "error",
+    "jsx-a11y/role-has-required-aria-props": "error",
+    "jsx-a11y/role-supports-aria-props": "error",
+    "jsx-a11y/scope": "error",
+    "jsx-a11y/label-has-associated-control": [
+      "error",
+      {
+        "assert": "htmlFor",
+        "labelComponents": ["FieldLabel"],
+        "controlComponents": ["Input", "Textarea"]
+      }
+    ],
+    // =============================================================================
+    // REACT RULES
+    // =============================================================================
+    "react/self-closing-comp": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/no-array-index-key": "error",
+    "react/prefer-es6-class": ["error", "always"],
+    "react/only-export-components": "off",
+    "react/jsx-boolean-value": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/no-unknown-property": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/jsx-max-depth": "off",
+    "react/no-multi-comp": "off",
+    "react/jsx-filename-extension": "off",
+    "button-has-type": "off",
+    "jsx-no-useless-fragment": "off",
+    "jsx-handler-names": "off",
+    "no-danger": "off",
+    "no-react-children": "off",
+    "jsx-pascal-case": "off",
+    // =============================================================================
+    // REACT-PERF RULES
+    // =============================================================================
+    "react-perf/jsx-no-jsx-as-prop": "off",
+    "react-perf/jsx-no-new-object-as-prop": "off",
+    "react-perf/jsx-no-new-array-as-prop": "off",
+    "react-perf/jsx-no-new-function-as-prop": "off",
+    // =============================================================================
+    // TYPESCRIPT RULES
+    // =============================================================================
+    "typescript/no-explicit-any": "error",
+    "typescript/no-unused-vars": "error",
+    "typescript/strict-boolean-expressions": "error",
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/no-empty-interface": "warn",
+    "typescript/no-inferrable-types": "warn",
+    "typescript/prefer-nullish-coalescing": "error",
+    "typescript/prefer-optional-chain": "error",
+    "typescript/prefer-as-const": "warn",
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-non-null-assertion": "off",
+    "typescript/no-deprecated": "warn",
+    "typescript/no-misused-promises": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/explicit-function-return-type": "off",
+    "typescript/explicit-module-boundary-types": "off",
+    "typescript/no-require-imports": "off",
+    "typescript/no-var-requires": "off",
+    "typescript/require-await": "off",
+    // =============================================================================
+    // IMPORT RULES
+    // =============================================================================
+    "import/consistent-type-specifier-style": ["error", "prefer-top-level"],
+    "import/first": "error",
+    "import/no-absolute-path": "error",
+    "import/no-mutable-exports": "error",
+    "import/no-commonjs": "error",
+    "import/no-dynamic-require": "error",
+    "import/max-dependencies": [
+      "error",
+      {
+        "max": 15
+      }
+    ],
+    "import/no-amd": "error",
+    "import/no-default-export": "off",
+    "import/no-webpack-loader-syntax": "error",
+    "import/no-duplicates": [
+      "error",
+      {
+        "prefer-inline": false
+      }
+    ],
+    "import/no-cycle": "off",
+    "import/no-relative-parent-imports": "off",
+    "import/exports-last": "off",
+    "import/no-named-export": "off",
+    "import/extensions": "off",
+    "import/no-namespace": "off",
+    "import/no-anonymous-default-export": "off",
+    "import/prefer-default-export": "off",
+    "import/group-exports": "off",
+    "import/unambiguous": "off",
+    "import/no-unassigned-import": "off",
+    "import/no-nodejs-modules": "off",
+    // =============================================================================
+    // UNICORN RULES
+    // =============================================================================
+    "unicorn/text-encoding-identifier-case": [
+      "error",
+      {
+        "withDash": true
+      }
+    ],
+    "unicorn/no-array-reduce": "error",
+    "unicorn/prefer-number-properties": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-document-cookie": "off",
+    "unicorn/no-lonely-if": "off",
+    "unicorn/explicit-length-check": "off",
+    "unicorn/no-array-callback-reference": "off",
+    "unicorn/no-process-exit": "off",
+    "unicorn/prefer-global-this": "off",
+    "unicorn/no-null": "off",
+    "unicorn/prefer-top-level-await": "off",
+    "unicorn/prefer-string-raw": "off",
+    // =============================================================================
+    // OXC RULES
+    // =============================================================================
+    "oxc/no-barrel-file": "off",
+    "oxc/no-map-spread": "off",
+    "oxc/no-async-await": "off",
+    "oxc/no-rest-spread-properties": "off",
+    "oxc/no-optional-chaining": "off",
+    // =============================================================================
+    // PROMISE RULES
+    // =============================================================================
+    "promise/avoid-new": "off",
+    "promise/catch-or-return": "off",
+    "promise/always-return": "off",
+    // =============================================================================
+    // NODE RULES
+    // =============================================================================
+    "node/no-process-env": "off",
+    // =============================================================================
+    // JSDOC RULES
+    // =============================================================================
+    "jsdoc/require-param": "off",
+    "jsdoc/require-param-type": "off",
+    "jsdoc/require-returns": "off",
+    "jsdoc/require-returns-type": "off",
+    // =============================================================================
+    // GENERAL ESLINT RULES - CORRECTNESS (ERROR)
+    // =============================================================================
+    "no-constant-binary-expression": "error",
+    "no-useless-rename": "error",
+    "curly": "error",
+    "prefer-const": "error",
+    "no-param-reassign": "error",
+    "no-useless-call": "error",
+    "no-useless-spread": "error",
+    "no-accumulating-spread": "error",
+    "no-useless-fallback-in-spread": "error",
+    "no-explicit-any": "error",
+    "no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-duplicate-imports": [
+      "error",
+      {
+        "allowSeparateTypeImports": true
+      }
+    ],
+    "no-void": [
+      "error",
+      {
+        "allowAsStatement": true
+      }
+    ],
+    "no-console": [
+      "error",
+      {
+        "allow": ["info", "warn", "error"]
+      }
+    ],
+    // =============================================================================
+    // GENERAL ESLINT RULES - STYLE (ERROR)
+    // =============================================================================
+    "arrow-body-style": ["error", "as-needed"],
+    // =============================================================================
+    // GENERAL ESLINT RULES - WARNINGS
+    // =============================================================================
+    "no-else-return": "warn",
+    // =============================================================================
+    // GENERAL ESLINT RULES - DISABLED (OFF)
+    // =============================================================================
+    "no-await-in-loop": "off",
+    "max-lines-per-function": "off",
+    "no-implicit-coercion": "off",
+    "no-magic-numbers": "off",
+    "no-ternary": "off",
+    "no-nested-ternary": "off",
+    "no-undefined": "off",
+    "max-lines": "warn",
+    "id-length": "off",
+    "no-inline-comments": "off",
+    "prefer-destructuring": "off",
+    "no-shadow": "off",
+    "no-negated-condition": "off",
+    "require-await": "off",
+    "prefer-template": "off",
+    "complexity": [
+      "warn",
+      {
+        "max": 10
+      }
+    ],
+    "sort-keys": "off",
+    "no-warning-comments": "off",
+    "no-promise-executor-return": "off",
+    "no-plusplus": "off",
+    "eqeqeq": ["error", "smart"],
+    "no-use-before-define": "off",
+    "no-unreadable-array-destructuring": "off",
+    "prefer-await-to-then": "off",
+    "prefer-await-to-callbacks": "off",
+    "self-closing-comp": [
+      "error",
+      {
+        "component": true,
+        "html": true
+      }
+    ],
+    "func-style": [
+      "off",
+      "expression",
+      {
+        "allowArrowFunctions": true
+      }
+    ],
+    "max-depth": "off",
+    "max-params": "off",
+    "max-statements": "off",
+    "capitalized-comments": "off",
+    "new-cap": "off",
+    "no-continue": "off",
+    "init-declarations": "off",
+    "sort-imports": "off",
+    "no-unused-expressions": "off",
+    "no-this-alias": "off"
+  },
+  "overrides": [
+    {
+      "files": ["packages/ui/src/components/**/*.{ts,tsx}"],
+      "rules": {
+        "jsx-a11y/alt-text": "off",
+        "jsx-a11y/anchor-ambiguous-text": "off",
+        "jsx-a11y/anchor-has-content": "off",
+        "jsx-a11y/anchor-is-valid": "off",
+        "jsx-a11y/aria-activedescendant-has-tabindex": "off",
+        "jsx-a11y/aria-props": "off",
+        "jsx-a11y/aria-proptypes": "off",
+        "jsx-a11y/aria-role": "off",
+        "jsx-a11y/aria-unsupported-elements": "off",
+        "jsx-a11y/autocomplete-valid": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/heading-has-content": "off",
+        "jsx-a11y/html-has-lang": "off",
+        "jsx-a11y/iframe-has-title": "off",
+        "jsx-a11y/img-redundant-alt": "off",
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/lang": "off",
+        "jsx-a11y/media-has-caption": "off",
+        "jsx-a11y/mouse-events-have-key-events": "off",
+        "jsx-a11y/no-access-key": "off",
+        "jsx-a11y/no-aria-hidden-on-focusable": "off",
+        "jsx-a11y/no-autofocus": "off",
+        "jsx-a11y/no-distracting-elements": "off",
+        "jsx-a11y/no-noninteractive-tabindex": "off",
+        "jsx-a11y/no-redundant-roles": "off",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "jsx-a11y/role-has-required-aria-props": "off",
+        "jsx-a11y/role-supports-aria-props": "off",
+        "jsx-a11y/scope": "off",
+        "jsx-a11y/tabindex-no-positive": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["**/env.d.ts"],
+  "extends": []
+}

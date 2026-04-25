@@ -1,13 +1,14 @@
-"use client"
+"use client";
 
-import { Language, translations } from "@/lib/translations"
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface HowItWorksProps {
-  language: Language
+  language: Language;
 }
 
 export function HowItWorks({ language }: HowItWorksProps) {
-  const t = translations[language].howItWorks
+  const t = translations[language].howItWorks;
 
   return (
     <section className="bg-background px-4 py-20 sm:px-6 lg:px-8" id="about">
@@ -28,9 +29,7 @@ export function HowItWorks({ language }: HowItWorksProps) {
                     {step.number}
                   </div>
                   <div className="flex-1">
-                    <h4 className="mb-2 text-lg font-bold text-foreground">
-                      {step.title}
-                    </h4>
+                    <h4 className="mb-2 text-lg font-bold text-foreground">{step.title}</h4>
                     <p className="text-muted-foreground">{step.description}</p>
                   </div>
                 </div>
@@ -49,9 +48,7 @@ export function HowItWorks({ language }: HowItWorksProps) {
                     {step.number}
                   </div>
                   <div className="flex-1">
-                    <h4 className="mb-2 text-lg font-bold text-foreground">
-                      {step.title}
-                    </h4>
+                    <h4 className="mb-2 text-lg font-bold text-foreground">{step.title}</h4>
                     <p className="text-muted-foreground">{step.description}</p>
                   </div>
                 </div>
@@ -61,5 +58,5 @@ export function HowItWorks({ language }: HowItWorksProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }

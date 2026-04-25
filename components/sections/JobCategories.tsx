@@ -1,35 +1,36 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { Language, translations } from "@/lib/translations"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons"
+import { useRef } from "react";
+
+import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface JobCategoriesProps {
-  language: Language
+  language: Language;
 }
 
 export function JobCategories({ language }: JobCategoriesProps) {
-  const categories = translations[language].jobCategories
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const categories = translations[language].jobCategories;
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 300
+      const scrollAmount = 300;
       scrollContainerRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   return (
     <section className="bg-background px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <h2 className="mb-12 text-center text-3xl font-bold text-foreground sm:text-4xl">
-          {language === "en"
-            ? "Browse by Category"
-            : "श्रेणी अनुसार ब्राउज गर्नुहोस्"}
+          {language === "en" ? "Browse by Category" : "श्रेणी अनुसार ब्राउज गर्नुहोस्"}
         </h2>
 
         <div className="relative">
@@ -40,10 +41,7 @@ export function JobCategories({ language }: JobCategoriesProps) {
             <HugeiconsIcon icon={ArrowLeft01Icon} className="size-6" />
           </button>
 
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto pb-2"
-          >
+          <div ref={scrollContainerRef} className="flex gap-4 overflow-x-auto pb-2">
             {categories.map((category, index) => (
               <button
                 key={index}
@@ -63,5 +61,5 @@ export function JobCategories({ language }: JobCategoriesProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }

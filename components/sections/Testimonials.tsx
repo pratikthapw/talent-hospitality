@@ -1,15 +1,17 @@
-"use client"
+"use client";
 
-import { Language, translations } from "@/lib/translations"
-import { HugeiconsIcon } from "@hugeicons/react"
-import { StarIcon } from "@hugeicons/core-free-icons"
+import { StarIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface TestimonialsProps {
-  language: Language
+  language: Language;
 }
 
 export function Testimonials({ language }: TestimonialsProps) {
-  const t = translations[language].testimonials
+  const t = translations[language].testimonials;
 
   return (
     <section className="bg-background px-4 py-20 sm:px-6 lg:px-8">
@@ -26,11 +28,7 @@ export function Testimonials({ language }: TestimonialsProps) {
             >
               <div className="mb-4 flex gap-1">
                 {[...Array(5)].map((_, i) => (
-                  <HugeiconsIcon
-                    key={i}
-                    icon={StarIcon}
-                    className="size-5 text-primary"
-                  />
+                  <HugeiconsIcon key={i} icon={StarIcon} className="size-5 text-primary" />
                 ))}
               </div>
 
@@ -43,9 +41,7 @@ export function Testimonials({ language }: TestimonialsProps) {
                   {testimonial.initials}
                 </div>
                 <div>
-                  <p className="font-bold text-foreground">
-                    {testimonial.name}
-                  </p>
+                  <p className="font-bold text-foreground">{testimonial.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {testimonial.role} &bull; {testimonial.company}
                   </p>
@@ -56,5 +52,5 @@ export function Testimonials({ language }: TestimonialsProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }

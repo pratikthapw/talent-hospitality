@@ -1,0 +1,164 @@
+{
+  "ignorePatterns": ["dist/**", "opencode.json", "packages/db/migrations/**", "plans/**"],
+  "sortTailwindcss": {
+    "stylesheet": "./app/globals.css",
+    "functions": ["clsx", "cn", "cva"]
+  },
+  "bracketSpacing": true,
+  "sortPackageJson": {
+    "sortScripts": true
+  },
+  "sortImports": {
+    "ignoreCase": true,
+    "internalPattern": ["~/", "@/", "@builders/"],
+    "customGroups": [
+      {
+        "groupName": "react",
+        "elementNamePattern": ["react", "react/**"]
+      },
+      {
+        "groupName": "next",
+        "elementNamePattern": ["next", "next/**"]
+      },
+      {
+        "groupName": "workspace",
+        "elementNamePattern": ["@builders", "@builders/**"]
+      }
+    ],
+    "groups": [
+      "react",
+      "next",
+      ["type-builtin", "value-builtin"],
+      ["type-external", "value-external"],
+      "workspace",
+      ["type-internal", "value-internal"],
+      {
+        "newlinesBetween": true
+      },
+      ["type-parent", "type-sibling", "type-index", "value-parent", "value-sibling", "value-index"],
+      "unknown"
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["apps/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}"],
+      "options": {
+        "sortImports": {
+          "ignoreCase": true,
+          "internalPattern": ["~/", "@/", "@builders/"],
+          "customGroups": [
+            {
+              "groupName": "react",
+              "elementNamePattern": ["react", "react/**"]
+            },
+            {
+              "groupName": "next",
+              "elementNamePattern": ["next", "next/**"]
+            },
+            {
+              "groupName": "types",
+              "elementNamePattern": ["types", "@/types", "@/types/**"]
+            },
+            {
+              "groupName": "config",
+              "elementNamePattern": ["@/config", "@/config/**"]
+            },
+            {
+              "groupName": "workspace",
+              "elementNamePattern": ["@builders", "@builders/**"]
+            },
+            {
+              "groupName": "lib",
+              "elementNamePattern": ["@/lib", "@/lib/**"]
+            },
+            {
+              "groupName": "hooks",
+              "elementNamePattern": ["@/hooks", "@/hooks/**"]
+            },
+            {
+              "groupName": "components-ui",
+              "elementNamePattern": ["@/components/ui", "@/components/ui/**"]
+            },
+            {
+              "groupName": "components",
+              "elementNamePattern": ["@/components", "@/components/**"]
+            },
+            {
+              "groupName": "providers",
+              "elementNamePattern": ["@/providers", "@/providers/**"]
+            },
+            {
+              "groupName": "app",
+              "elementNamePattern": ["@/app", "@/app/**"]
+            },
+            {
+              "groupName": "content",
+              "elementNamePattern": ["@/content", "@/content/**"]
+            },
+            {
+              "groupName": "public",
+              "elementNamePattern": ["@/public", "@/public/**"]
+            }
+          ],
+          "groups": [
+            "react",
+            "next",
+            ["type-builtin", "value-builtin"],
+            ["type-external", "value-external"],
+            "types",
+            "config",
+            "workspace",
+            "lib",
+            "hooks",
+            "components-ui",
+            "components",
+            "providers",
+            "app",
+            "content",
+            "public",
+            ["type-internal", "value-internal"],
+            {
+              "newlinesBetween": true
+            },
+            [
+              "type-parent",
+              "type-sibling",
+              "type-index",
+              "value-parent",
+              "value-sibling",
+              "value-index"
+            ],
+            "unknown"
+          ]
+        }
+      }
+    },
+    {
+      "files": ["apps/academy/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,css}"],
+      "options": {
+        "sortTailwindcss": {
+          "stylesheet": "./apps/academy/app/globals.css",
+          "functions": ["clsx", "cn", "cva"]
+        }
+      }
+    },
+    {
+      "files": ["apps/house/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,css}"],
+      "options": {
+        "sortTailwindcss": {
+          "stylesheet": "./apps/house/app/globals.css",
+          "functions": ["clsx", "cn", "cva"]
+        }
+      }
+    },
+    {
+      "files": ["packages/ui/**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts,css}"],
+      "options": {
+        "sortTailwindcss": {
+          "stylesheet": "./packages/ui/src/styles/globals.css",
+          "functions": ["clsx", "cn", "cva"]
+        }
+      }
+    }
+  ]
+}

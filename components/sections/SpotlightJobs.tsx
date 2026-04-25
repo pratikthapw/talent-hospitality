@@ -1,22 +1,21 @@
-"use client"
+"use client";
 
-import { Language, translations } from "@/lib/translations"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import type { Language} from "@/lib/translations";
+import { translations } from "@/lib/translations";
 
 interface SpotlightJobsProps {
-  language: Language
+  language: Language;
 }
 
 export function SpotlightJobs({ language }: SpotlightJobsProps) {
-  const t = translations[language].spotlightJobs
+  const t = translations[language].spotlightJobs;
 
   return (
     <section id="jobs" className="bg-foreground px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-16 text-center">
-          <h2 className="mb-4 text-4xl font-bold text-primary sm:text-5xl">
-            {t.title}
-          </h2>
+          <h2 className="mb-4 text-4xl font-bold text-primary sm:text-5xl">{t.title}</h2>
           <p className="text-lg text-background">{t.description}</p>
         </div>
 
@@ -27,17 +26,13 @@ export function SpotlightJobs({ language }: SpotlightJobsProps) {
               className="animate-fade-in-up flex flex-col rounded-xl border border-border bg-background p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
             >
               <div className="mb-4">
-                <h3 className="mb-2 text-xl font-bold text-foreground">
-                  {job.title}
-                </h3>
+                <h3 className="mb-2 text-xl font-bold text-foreground">{job.title}</h3>
                 <p className="font-semibold text-primary">{job.company}</p>
                 <p className="text-sm text-muted-foreground">{job.location}</p>
               </div>
 
               <div className="mb-4 flex-1">
-                <p className="mb-4 text-sm text-muted-foreground">
-                  {job.description}
-                </p>
+                <p className="mb-4 text-sm text-muted-foreground">{job.description}</p>
                 <div className="flex flex-wrap gap-2">
                   <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
                     {job.type}
@@ -68,5 +63,5 @@ export function SpotlightJobs({ language }: SpotlightJobsProps) {
         </div>
       </div>
     </section>
-  )
+  );
 }

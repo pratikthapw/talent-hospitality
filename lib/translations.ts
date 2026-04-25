@@ -1,4 +1,4 @@
-export type Language = "en" | "ne"
+export type Language = "en" | "ne";
 
 export const translations = {
   en: {
@@ -31,8 +31,7 @@ export const translations = {
           {
             number: "1",
             title: "Create Profile",
-            description:
-              "Set up your profile with your skills, experience, and preferences",
+            description: "Set up your profile with your skills, experience, and preferences",
           },
           {
             number: "2",
@@ -116,8 +115,7 @@ export const translations = {
           location: "Kathmandu",
           salary: "80,000 - 120,000",
           type: "Full-time",
-          description:
-            "Looking for an experienced chef to lead our kitchen operations",
+          description: "Looking for an experienced chef to lead our kitchen operations",
         },
         {
           title: "Front Desk Manager",
@@ -133,8 +131,7 @@ export const translations = {
           location: "Bhaktapur",
           salary: "25,000 - 35,000",
           type: "Full-time",
-          description:
-            "Maintain rooms to highest standards and ensure guest satisfaction",
+          description: "Maintain rooms to highest standards and ensure guest satisfaction",
         },
       ],
     },
@@ -146,8 +143,7 @@ export const translations = {
       },
       forEmployers: {
         title: "Hire Top Talent",
-        description:
-          "Find the right professionals for your team quickly and easily",
+        description: "Find the right professionals for your team quickly and easily",
         button: "Post Your First Job",
       },
     },
@@ -185,12 +181,7 @@ export const translations = {
       jobSeeker: {
         title: "For Job Seekers",
         price: "FREE",
-        features: [
-          "Browse all jobs",
-          "Apply unlimited",
-          "Profile creation",
-          "Job alerts",
-        ],
+        features: ["Browse all jobs", "Apply unlimited", "Profile creation", "Job alerts"],
       },
       employer: {
         title: "For Employers",
@@ -245,8 +236,7 @@ export const translations = {
           {
             number: "1",
             title: "प्रोफाइल बनाउनुहोस्",
-            description:
-              "आपनो सीपहरु, अनुभव र प्राथमिकताहरु संग प्रोफाइल सेट गर्नुहोस्",
+            description: "आपनो सीपहरु, अनुभव र प्राथमिकताहरु संग प्रोफाइल सेट गर्नुहोस्",
           },
           {
             number: "2",
@@ -256,8 +246,7 @@ export const translations = {
           {
             number: "3",
             title: "आवेदन र जोडिनुहोस्",
-            description:
-              "सीधै आवेदन गर्नुहोस् र भर्ती प्रबन्धकहरु संग जोडिनुहोस्",
+            description: "सीधै आवेदन गर्नुहोस् र भर्ती प्रबन्धकहरु संग जोडिनुहोस्",
           },
         ],
       },
@@ -272,8 +261,7 @@ export const translations = {
           {
             number: "2",
             title: "उम्मेदवारहरु समीक्षा गर्नुहोस्",
-            description:
-              "योग्य पेशेवारहरुको प्रोफाइलमा पहुँच प्राप्त गर्नुहोस्",
+            description: "योग्य पेशेवारहरुको प्रोफाइलमा पहुँच प्राप्त गर्नुहोस्",
           },
           {
             number: "3",
@@ -340,8 +328,7 @@ export const translations = {
           location: "पोखरा",
           salary: "50,000 - 75,000",
           type: "पूर्ण समय",
-          description:
-            "अतिथि सेवा व्यवस्थापन गर्नुहोस् र फ्रन्ट डेस्क टिम नेतृत्व गर्नुहोस्",
+          description: "अतिथि सेवा व्यवस्थापन गर्नुहोस् र फ्रन्ट डेस्क टिम नेतृत्व गर्नुहोस्",
         },
         {
           title: "कोठा भाडेदार",
@@ -349,8 +336,7 @@ export const translations = {
           location: "भक्तपुर",
           salary: "25,000 - 35,000",
           type: "पूर्ण समय",
-          description:
-            "कोठाहरु उच्चतम मानदण्ड अनुरक्षण गर्नुहोस् र अतिथि सन्तुष्टि सुनिश्चित गर्नुहोस्",
+          description: "कोठाहरु उच्चतम मानदण्ड अनुरक्षण गर्नुहोस् र अतिथि सन्तुष्टि सुनिश्चित गर्नुहोस्",
         },
       ],
     },
@@ -400,22 +386,12 @@ export const translations = {
       jobSeeker: {
         title: "कामको खोजीको लागि",
         price: "नि:शुल्क",
-        features: [
-          "सबै काम ब्राउज गर्नुहोस्",
-          "असीमित आवेदन",
-          "प्रोफाइल निर्माण",
-          "काम सूचनाहरु",
-        ],
+        features: ["सबै काम ब्राउज गर्नुहोस्", "असीमित आवेदन", "प्रोफाइल निर्माण", "काम सूचनाहरु"],
       },
       employer: {
         title: "नियोक्ताहरुको लागि",
         price: "अनुकूलित",
-        features: [
-          "असीमित काम पोस्ट गर्नुहोस्",
-          "उम्मेदवारमा पहुँच",
-          "उन्नत छनौट",
-          "समर्पित समर्थन",
-        ],
+        features: ["असीमित काम पोस्ट गर्नुहोस्", "उम्मेदवारमा पहुँच", "उन्नत छनौट", "समर्पित समर्थन"],
       },
     },
     footer: {
@@ -430,4 +406,4 @@ export const translations = {
       followUs: "हामरो पछ्याउनुहोस्",
     },
   },
-}
+};
