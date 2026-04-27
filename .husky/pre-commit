@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+if [ -n "$SKIP_LINT_STAGED" ]; then
+    exit 0
+fi
+
+if sh -c ": >/dev/tty" >/dev/null 2>/dev/null; then
+    exec >/dev/tty 2>&1
+fi
+
+pnpm exec lint-staged
