@@ -6,7 +6,7 @@ import { Menu02Icon, Cancel01Icon, Globe02Icon } from "@hugeicons/core-free-icon
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface NavigationProps {
@@ -47,7 +47,9 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
 
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onLanguageChange(language === "en" ? "ne" : "en")}
+            onClick={() => {
+              onLanguageChange(language === "en" ? "ne" : "en");
+            }}
             className="flex items-center gap-1.5 rounded-lg border border-primary px-3 py-2 text-xs font-medium text-primary transition hover:bg-muted sm:text-sm"
           >
             <HugeiconsIcon icon={Globe02Icon} className="size-4" />
@@ -63,7 +65,9 @@ export function Navigation({ language, onLanguageChange }: NavigationProps) {
 
           <button
             className="p-2 text-foreground md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => {
+              setIsMenuOpen(!isMenuOpen);
+            }}
           >
             <HugeiconsIcon icon={isMenuOpen ? Cancel01Icon : Menu02Icon} className="size-6" />
           </button>

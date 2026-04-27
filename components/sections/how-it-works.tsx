@@ -1,6 +1,6 @@
 "use client";
 
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface HowItWorksProps {
@@ -23,8 +23,8 @@ export function HowItWorks({ language }: HowItWorksProps) {
               {t.forJobSeekers.title}
             </h3>
             <div className="flex flex-col gap-8">
-              {t.forJobSeekers.steps.map((step, index) => (
-                <div key={index} className="flex gap-6">
+              {t.forJobSeekers.steps.map((step) => (
+                <div key={step.number} className="flex gap-6">
                   <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
                     {step.number}
                   </div>
@@ -42,8 +42,8 @@ export function HowItWorks({ language }: HowItWorksProps) {
               {t.forEmployers.title}
             </h3>
             <div className="flex flex-col gap-8">
-              {t.forEmployers.steps.map((step, index) => (
-                <div key={index} className="flex gap-6">
+              {t.forEmployers.steps.map((step) => (
+                <div key={step.number} className="flex gap-6">
                   <div className="text-destructive-foreground flex size-16 shrink-0 items-center justify-center rounded-full bg-destructive text-xl font-bold">
                     {step.number}
                   </div>

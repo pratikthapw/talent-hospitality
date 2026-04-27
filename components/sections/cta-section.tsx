@@ -4,7 +4,7 @@ import { UserGroupIcon, Building03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface CTASectionProps {

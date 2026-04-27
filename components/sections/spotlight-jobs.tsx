@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface SpotlightJobsProps {
@@ -20,9 +20,9 @@ export function SpotlightJobs({ language }: SpotlightJobsProps) {
         </div>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {t.jobs.map((job, index) => (
+          {t.jobs.map((job) => (
             <div
-              key={index}
+              key={`${job.title}-${job.company}`}
               className="animate-fade-in-up flex flex-col rounded-xl border border-border bg-background p-6 transition-all duration-300 hover:scale-105 hover:shadow-2xl"
             >
               <div className="mb-4">

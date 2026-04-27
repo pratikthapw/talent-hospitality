@@ -3,7 +3,7 @@
 import { StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface TestimonialsProps {
@@ -12,6 +12,7 @@ interface TestimonialsProps {
 
 export function Testimonials({ language }: TestimonialsProps) {
   const t = translations[language].testimonials;
+  const ratingStars = [1, 2, 3, 4, 5];
 
   return (
     <section className="bg-background px-4 py-20 sm:px-6 lg:px-8">
@@ -21,14 +22,14 @@ export function Testimonials({ language }: TestimonialsProps) {
         </h2>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          {t.items.map((testimonial, index) => (
+          {t.items.map((testimonial) => (
             <div
-              key={index}
+              key={`${testimonial.name}-${testimonial.company}`}
               className="rounded-xl border-2 border-primary bg-card p-8 shadow-lg transition-all duration-300 hover:shadow-xl"
             >
               <div className="mb-4 flex gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <HugeiconsIcon key={i} icon={StarIcon} className="size-5 text-primary" />
+                {ratingStars.map((rating) => (
+                  <HugeiconsIcon key={rating} icon={StarIcon} className="size-5 text-primary" />
                 ))}
               </div>
 

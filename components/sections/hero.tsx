@@ -6,7 +6,7 @@ import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 import heroImage from "@/public/hero-image.webp";
 
@@ -52,7 +52,7 @@ export function Hero({ language }: HeroProps) {
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
           {t.stats.map((stat, index) => (
             <div
-              key={index}
+              key={stat.label}
               className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
               style={{
                 animationFillMode: "both",

@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface JobCategoriesProps {
@@ -35,16 +35,18 @@ export function JobCategories({ language }: JobCategoriesProps) {
 
         <div className="relative">
           <button
-            onClick={() => scroll("left")}
+            onClick={() => {
+              scroll("left");
+            }}
             className="absolute top-1/2 left-0 z-10 hidden -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-muted sm:flex lg:-translate-x-12"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} className="size-6" />
           </button>
 
           <div ref={scrollContainerRef} className="flex gap-4 overflow-x-auto pb-2">
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <button
-                key={index}
+                key={category}
                 className="shrink-0 rounded-full border-2 border-primary bg-primary px-6 py-3 text-sm font-semibold whitespace-nowrap text-primary-foreground transition-all duration-300 hover:scale-110"
               >
                 {category}
@@ -53,7 +55,9 @@ export function JobCategories({ language }: JobCategoriesProps) {
           </div>
 
           <button
-            onClick={() => scroll("right")}
+            onClick={() => {
+              scroll("right");
+            }}
             className="absolute top-1/2 right-0 z-10 hidden translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-primary text-primary-foreground transition hover:bg-muted sm:flex lg:translate-x-12"
           >
             <HugeiconsIcon icon={ArrowRight01Icon} className="size-6" />

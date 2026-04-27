@@ -4,7 +4,7 @@ import { CheckmarkCircle01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface PricingTeaserProps {
@@ -26,8 +26,8 @@ export function PricingTeaser({ language }: PricingTeaserProps) {
             <h3 className="mb-2 text-2xl font-bold text-foreground">{t.jobSeeker.title}</h3>
             <p className="mb-6 text-5xl font-bold text-primary">{t.jobSeeker.price}</p>
             <ul className="mb-8 flex flex-col gap-3 text-left">
-              {t.jobSeeker.features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3 text-foreground/80">
+              {t.jobSeeker.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-3 text-foreground/80">
                   <HugeiconsIcon
                     icon={CheckmarkCircle01Icon}
                     className="size-5 shrink-0 text-primary"
@@ -48,8 +48,8 @@ export function PricingTeaser({ language }: PricingTeaserProps) {
             <h3 className="mb-2 text-2xl font-bold text-foreground">{t.employer.title}</h3>
             <p className="mb-6 text-5xl font-bold text-destructive">{t.employer.price}</p>
             <ul className="mb-8 flex flex-col gap-3 text-left">
-              {t.employer.features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-3 text-foreground/80">
+              {t.employer.features.map((feature) => (
+                <li key={feature} className="flex items-center gap-3 text-foreground/80">
                   <HugeiconsIcon
                     icon={CheckmarkCircle01Icon}
                     className="size-5 shrink-0 text-destructive"

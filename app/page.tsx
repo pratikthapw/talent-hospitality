@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 
-import { CTASection } from "@/components/sections/CTASection";
-import { FeaturesGrid } from "@/components/sections/FeaturesGrid";
-import { Footer } from "@/components/sections/Footer";
-import { Hero } from "@/components/sections/Hero";
-import { HowItWorks } from "@/components/sections/HowItWorks";
-import { JobCategories } from "@/components/sections/JobCategories";
-import { Navigation } from "@/components/sections/Navigation";
-import { PricingTeaser } from "@/components/sections/PricingTeaser";
-import { SpotlightJobs } from "@/components/sections/SpotlightJobs";
-import { Testimonials } from "@/components/sections/Testimonials";
+import { CTASection } from "@/components/sections/cta-section";
+import { FeaturesGrid } from "@/components/sections/features-grid";
+import { Footer } from "@/components/sections/footer";
+import { Hero } from "@/components/sections/hero";
+import { HowItWorks } from "@/components/sections/how-it-works";
+import { JobCategories } from "@/components/sections/job-categories";
+import { Navigation } from "@/components/sections/navigation";
+import { PricingTeaser } from "@/components/sections/pricing-teaser";
+import { SpotlightJobs } from "@/components/sections/spotlight-jobs";
+import { Testimonials } from "@/components/sections/testimonials";
 import type { Language } from "@/lib/translations";
 
 export default function Page() {

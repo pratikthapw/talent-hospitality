@@ -10,7 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { Language} from "@/lib/translations";
+import type { Language } from "@/lib/translations";
 import { translations } from "@/lib/translations";
 
 interface FeaturesGridProps {
@@ -37,20 +37,26 @@ export function FeaturesGrid({ language }: FeaturesGridProps) {
         </h2>
 
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {t.items.map((feature, index) => (
-            <div
-              key={index}
-              className="rounded-xl border-2 border-primary bg-background p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-            >
-              <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <HugeiconsIcon icon={featureIcons[index]} className="size-6" />
+          {t.items.map((feature, index) => {
+            const icon = featureIcons[index];
+
+            return (
+              <div
+                key={feature.title}
+                className="rounded-xl border-2 border-primary bg-background p-8 transition-all duration-300 hover:scale-105 hover:shadow-lg"
+              >
+                <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <HugeiconsIcon icon={icon} className="size-6" />
+                </div>
+
+                <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
+
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {feature.description}
+                </p>
               </div>
-
-              <h3 className="mb-3 text-xl font-bold text-foreground">{feature.title}</h3>
-
-              <p className="text-sm leading-relaxed text-muted-foreground">{feature.description}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
