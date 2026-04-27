@@ -1,94 +1,54 @@
-Implement `talent-hospitality` using GitHub Issues and the parent branch for this PRD.
+Implement `talent-hospitality` using GitHub Issues and the parent branch for `#{{PARENT_ISSUE}}`.
 
-## Repo Contract
-
-- Durable progress lives in GitHub issues, issue comments, and git commits. Do not create or maintain a local progress log.
-- Use exactly one branch per parent PRD issue. Stay on the parent branch prepared for `#{{PARENT_ISSUE}}` for the whole session.
-- Do not create a new branch per child issue unless that child issue's `PR flow` explicitly requires it.
-- Work on exactly one ready child issue in a session.
-- Leave the parent PRD issue open.
-- Canonical domain vocabulary lives in `UBIQUITOUS_LANGUAGE.md`. Use those terms in code, UI copy, comments, commit bodies, and issue comments when the domain is involved.
+## Contract
+- Progress lives in GitHub issues, comments, and commits — no local log.
+- One branch per PRD; stay on the parent branch for `#{{PARENT_ISSUE}}` all session.
+- No new branch per child issue unless its `PR flow` requires one.
+- One ready child issue per session; leave the parent issue open.
+- Use `UBIQUITOUS_LANGUAGE.md` terms in code, UI, comments, commits, and issue comments.
 
 ## 1. Orient
+a. `gh issue view {{PARENT_ISSUE}}` — read in full.
+b. Skim `UBIQUITOUS_LANGUAGE.md` if needed.
+c. `gh issue list --state open --limit 20 --search "#{{PARENT_ISSUE}} in:body" --json number,title,body`
+d. `git branch --show-current && git status --short && git log --oneline --decorate -n 12`
+e. From each open child extract: `Blocked by`, `Skills`, `Files`, `Acceptance criteria`, `PR flow`.
+f. Skip blocked issues; respect dependency order.
 
-a. Read the parent issue `#{{PARENT_ISSUE}}` in full.
-b. Read `UBIQUITOUS_LANGUAGE.md` if necessary.
-c. Find open child issues with:
-   `gh issue list --state open --limit 20 --search "#{{PARENT_ISSUE}} in:body" --json number,title,body`
-d. Read the current branch:
-   `git branch --show-current`
-e. Read current git status:
-   `git status --short`
-f. Read the latest commits:
-   `git log --oneline --decorate -n 12`
-g. For each open child issue, extract:
-   - `Blocked by`
-   - `Skills`
-   - `Files`
-   - `Acceptance criteria`
-   - `PR flow`
-h. Ignore blocked issues. Respect dependency order from each issue body.
+## 2. Pick One Issue
+Pick the **riskiest** ready issue (never the easiest).
 
-## 2. Pick the Next Issue
+Priority: architectural → integrations → unknown complexity → a11y/security → api/data → performance → polish
 
-Pick exactly one ready child issue.
-
-Priority:
-- architectural
-- integrations
-- unknown complexity
-- a11y or security
-- api or data
-- performance
-- polish
-
-Rules:
-- Never pick the easiest ready issue. Pick the riskiest ready issue.
-- Skip issues that are blocked by still-open dependencies.
-- Skip issues that require human input if an AFK-ready issue exists.
+Skip: blocked issues; issues requiring human input when an AFK-ready alternative exists.
 
 ## 3. Load Skills
-
-For the chosen child issue, load every skill named in its `Skills` section.
-Skip gracefully if a skill cannot be loaded, but continue with the rest.
+Load every skill in the issue's `Skills` section. Skip gracefully if unavailable.
 
 ## 4. Implement
-
-a. Treat the branch shown in the runtime context as the authoritative parent branch for this PRD.
-b. If you are not already on that branch, switch back to it before editing.
-c. Read every file listed in the chosen issue's `Files` section before editing.
-d. If the issue body references additional prerequisite files indirectly, read only the minimum extra files needed.
-e. Keep the diff minimal and focused to that one child issue.
-f. Use canonical THP domain terms from `UBIQUITOUS_LANGUAGE.md` when implementing product logic or copy.
+- Confirm you are on the parent branch for `#{{PARENT_ISSUE}}`; switch if not.
+- Read every file in `Files` plus minimum indirectly referenced extras before editing.
+- Keep the diff focused to this one child issue.
+- Apply `UBIQUITOUS_LANGUAGE.md` terms to all product logic and copy.
 
 ## 5. Verify
-
-Verification is code-review-first.
-
-a. Re-read the changed files and check each acceptance criterion against the implementation directly.
-b. Do not claim success for anything not actually implemented.
+Re-read changed files and check each acceptance criterion directly against the implementation. Do not claim success for anything not implemented.
 
 ## 6. Commit
+One commit on the parent branch, before closing:
 
-Commit before closing the issue or printing final status.
+```
+<issue-number>: <one-line summary>
 
-Commit on the parent branch for `#{{PARENT_ISSUE}}`.
+Parent: #{{PARENT_ISSUE}}
+Issue: #<n> <title>
+Why: <vertical slice completed>
+Files: <comma-separated>
+Verify: <code-review basis>
+Notes: <follow-up or none>
+```
 
-Use one commit for the chosen child issue with:
-
-Subject:
-`<issue-number>: <one-line summary>`
-
-Body:
-- `Parent: #{{PARENT_ISSUE}}`
-- `Issue: #<child-issue-number> <child-issue-title>`
-- `Why: <what vertical slice was completed>`
-- `Files: <comma-separated changed files>`
-- `Verify: <code-review basis>`
-- `Notes: <follow-up or none>`
-
-## 7. Close or Report
-a. Close the child issue only after the comment is posted.
-b. Leave the parent issue open.
-c. If no open child issues remain after this session, print `<promise>COMPLETE</promise>`.
-d. If you hit an unresolvable blocker, leave a comment on the blocked child issue explaining the blocker, then print `<promise>BLOCKED</promise>`.
+## 7. Close & Report
+a. Post a comment on the child issue, then close it. Leave the parent issue open.
+b. No open child issues remain → print `<promise>COMPLETE</promise>`
+c. Unresolvable blocker → comment on the blocked issue explaining it, then print `<promise>BLOCKED</promise>`
