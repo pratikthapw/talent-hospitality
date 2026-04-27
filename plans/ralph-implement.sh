@@ -261,16 +261,23 @@ for ((i=1; i<=$ITERATIONS; i++)); do
   spinner_idx=0
   start_ts=$(date +%s)
   last_line=""
+  current_model=""
   while kill -0 "$OC_PID" 2>/dev/null; do
     elapsed=$(( $(date +%s) - start_ts ))
     mins=$(( elapsed / 60 ))
     secs=$(( elapsed % 60 ))
-    # Grab the last non-empty line from the log for live context
-    new_line=$(tail -n1 "$ITER_LOG" 2>/dev/null | tr -d '\r\n' | cut -c1-60)
+    new_line=$(tail -n1 "$ITER_LOG" 2>/dev/null | tr -d '\r\n' | cut -c1-80)
     if [ -n "$new_line" ]; then last_line="$new_line"; fi
+    latest_model=$(grep -oE '> [a-z]+-[a-z]+ · [^ ]+|> implement · [^ ]+' "$ITER_LOG" 2>/dev/null | tail -1 | tr -d '\r\n' || true)
+    if [ -n "$latest_model" ]; then current_model="$latest_model"; fi
     frame="${spinner_frames[$spinner_idx]}"
-    printf "\r\033[K  %s  Sub-agent working… %02d:%02d  %s" \
-      "$frame" "$mins" "$secs" "$last_line"
+    if [ -n "$current_model" ]; then
+      printf "\r\033[K  %s  %s  %02d:%02d  %s" \
+        "$frame" "$current_model" "$mins" "$secs" "$last_line"
+    else
+      printf "\r\033[K  %s  Sub-agent working… %02d:%02d  %s" \
+        "$frame" "$mins" "$secs" "$last_line"
+    fi
     spinner_idx=$(( (spinner_idx + 1) % ${#spinner_frames[@]} ))
     sleep 0.1
   done
