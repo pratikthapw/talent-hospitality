@@ -1,18 +1,20 @@
 Implement `talent-hospitality` using GitHub Issues and the parent branch for `#{{PARENT_ISSUE}}`.
 
 ## Contract
-- Progress lives in GitHub issues, comments, and commits — no local log.
-- One branch per PRD; stay on the parent branch for `#{{PARENT_ISSUE}}` all session.
-- No new branch per child issue unless its `PR flow` requires one.
-- One ready child issue per session; leave the parent issue open.
+- One parent issue = one branch. All sub-issues are commits on that single parent branch.
+- No separate branches per sub-issue. No PRs per sub-issue.
+- The parent branch is pushed to remote once created and stays pushed throughout.
+- After each sub-issue commit: push to remote, post comment on the child issue, close it on GitHub.
+- Leave the parent issue open while children are in progress. When all children are closed, close the parent issue too.
+- The parent branch stays open against main (do not merge or create a PR until all sub-issues are done).
 - Use `UBIQUITOUS_LANGUAGE.md` terms in code, UI, comments, commits, and issue comments.
 
 ## 1. Orient
 a. `gh issue view {{PARENT_ISSUE}}` — read in full.
 b. Skim `UBIQUITOUS_LANGUAGE.md` if needed.
-c. `gh issue list --state open --limit 20 --search "#{{PARENT_ISSUE}} in:body" --json number,title,body`
+c. `gh issue list --state open --limit 200 --search "#{{PARENT_ISSUE}} in:body" --json number,title,body`
 d. `git branch --show-current && git status --short && git log --oneline --decorate -n 12`
-e. From each open child extract: `Blocked by`, `Skills`, `Files`, `Acceptance criteria`, `PR flow`.
+e. From each open child extract: `Blocked by`, `Skills`, `Files`, `Acceptance criteria`.
 f. Skip blocked issues; respect dependency order.
 
 ## 2. Pick One Issue
@@ -34,8 +36,8 @@ Load every skill in the issue's `Skills` section. Skip gracefully if unavailable
 ## 5. Verify
 Re-read changed files and check each acceptance criterion directly against the implementation. Do not claim success for anything not implemented.
 
-## 6. Commit
-One commit on the parent branch, before closing:
+## 6. Commit, Push, Close
+One commit on the parent branch:
 
 ```
 <issue-number>: <one-line summary>
@@ -48,7 +50,11 @@ Verify: <code-review basis>
 Notes: <follow-up or none>
 ```
 
-## 7. Close & Report
-a. Post a comment on the child issue, then close it. Leave the parent issue open.
-b. No open child issues remain → print `<promise>COMPLETE</promise>`
-c. Unresolvable blocker → comment on the blocked issue explaining it, then print `<promise>BLOCKED</promise>`
+Then immediately:
+a. `git push origin <parent-branch>` — push the commit to remote.
+b. Post a comment on the child issue summarizing what was done.
+c. `gh issue close <child-issue-number>` — close the child issue on GitHub.
+
+## 7. Report
+a. No open child issues remain → close the parent issue on GitHub, then print `<promise>COMPLETE</promise>`
+b. Unresolvable blocker → comment on the blocked issue explaining it, then print `<promise>BLOCKED</promise>`
