@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -73,9 +73,112 @@ export const verification = pgTable(
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const userRelations = relations(user, ({ many }) => ({
+export const userRoles = pgTable(
+  "user_roles",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["admin", "employer", "employee"] }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("user_roles_userId_idx").on(table.userId),
+    index("user_roles_role_idx").on(table.role),
+    uniqueIndex("user_roles_userId_role_unique").on(table.userId, table.role),
+  ],
+);
+
+export const employeeProfile = pgTable(
+  "employee_profile",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    verificationStatus: text("verification_status", {
+      enum: ["unverified", "pending_review", "verified", "rejected"],
+    })
+      .notNull()
+      .default("unverified"),
+    verificationNotes: text("verification_notes"),
+    verifiedBy: text("verified_by").references(() => user.id),
+    verifiedAt: timestamp("verified_at"),
+    verificationUpdatedAt: timestamp("verification_updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("employee_profile_userId_idx").on(table.userId),
+    index("employee_profile_verification_status_idx").on(table.verificationStatus),
+  ],
+);
+
+export const auditLog = pgTable(
+  "audit_log",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    actorId: text("actor_id")
+      .notNull()
+      .references(() => user.id),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    action: text("action").notNull(),
+    details: text("details"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("audit_log_actorId_idx").on(table.actorId),
+    index("audit_log_target_idx").on(table.targetType, table.targetId),
+    index("audit_log_action_idx").on(table.action),
+    index("audit_log_created_at_idx").on(table.createdAt),
+  ],
+);
+
+export const suspendedUser = pgTable(
+  "suspended_user",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    suspendedBy: text("suspended_by")
+      .notNull()
+      .references(() => user.id),
+    reason: text("reason").notNull(),
+    suspendedAt: timestamp("suspended_at").defaultNow().notNull(),
+    unsuspendedAt: timestamp("unsuspended_at"),
+    unsuspendedBy: text("unsuspended_by").references(() => user.id),
+  },
+  (table) => [index("suspended_user_userId_idx").on(table.userId)],
+);
+
+export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
+  roles: many(userRoles),
+  employeeProfile: one(employeeProfile, {
+    fields: [user.id],
+    references: [employeeProfile.userId],
+  }),
+  suspension: one(suspendedUser, {
+    fields: [user.id],
+    references: [suspendedUser.userId],
+  }),
 }));
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -89,5 +192,49 @@ export const accountRelations = relations(account, ({ one }) => ({
   user: one(user, {
     fields: [account.userId],
     references: [user.id],
+  }),
+}));
+
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
+  user: one(user, {
+    fields: [userRoles.userId],
+    references: [user.id],
+  }),
+}));
+
+export const employeeProfileRelations = relations(employeeProfile, ({ one }) => ({
+  user: one(user, {
+    fields: [employeeProfile.userId],
+    references: [user.id],
+  }),
+  verifiedByUser: one(user, {
+    fields: [employeeProfile.verifiedBy],
+    references: [user.id],
+    relationName: "employee_verified_by",
+  }),
+}));
+
+export const auditLogRelations = relations(auditLog, ({ one }) => ({
+  actor: one(user, {
+    fields: [auditLog.actorId],
+    references: [user.id],
+    relationName: "audit_log_actor",
+  }),
+}));
+
+export const suspendedUserRelations = relations(suspendedUser, ({ one }) => ({
+  user: one(user, {
+    fields: [suspendedUser.userId],
+    references: [user.id],
+  }),
+  suspendedByUser: one(user, {
+    fields: [suspendedUser.suspendedBy],
+    references: [user.id],
+    relationName: "suspended_by_user",
+  }),
+  unsuspendedByUser: one(user, {
+    fields: [suspendedUser.unsuspendedBy],
+    references: [user.id],
+    relationName: "unsuspended_by_user",
   }),
 }));
