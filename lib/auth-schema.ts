@@ -1,5 +1,14 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  json,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -200,6 +209,56 @@ export const employerProfile = pgTable(
   ],
 );
 
+export const plan = pgTable("plan", {
+  id: text("id").primaryKey(),
+  key: text("key", { enum: ["free", "pro", "premium", "enterprise"] })
+    .notNull()
+    .unique(),
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  billingTerms: json("billing_terms").$type<("monthly" | "yearly")[]>().notNull(),
+  monthlyCreditGrant: integer("monthly_credit_grant").notNull().default(0),
+  canPublishJobs: boolean("can_publish_jobs").notNull().default(false),
+  canSearchCandidates: boolean("can_search_candidates").notNull().default(false),
+  canUseBoosts: boolean("can_use_boosts").notNull().default(false),
+  maxJobDrafts: integer("max_job_drafts").notNull().default(0),
+  maxPublishedJobs: integer("max_published_jobs").notNull().default(0),
+  sortOrder: integer("sort_order").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const employerSubscription = pgTable(
+  "employer_subscription",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    employerProfileId: text("employer_profile_id")
+      .notNull()
+      .unique()
+      .references(() => employerProfile.id, { onDelete: "cascade" }),
+    planId: text("plan_id")
+      .notNull()
+      .references(() => plan.id),
+    billingTerm: text("billing_term", { enum: ["monthly", "yearly"] }).notNull(),
+    status: text("status", { enum: ["active", "expired", "cancelled"] })
+      .notNull()
+      .default("active"),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("employer_subscription_profile_idx").on(table.employerProfileId),
+    index("employer_subscription_status_idx").on(table.status),
+  ],
+);
+
 export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -285,5 +344,24 @@ export const employerProfileRelations = relations(employerProfile, ({ one }) => 
     fields: [employerProfile.verifiedBy],
     references: [user.id],
     relationName: "employer_verified_by",
+  }),
+  subscription: one(employerSubscription, {
+    fields: [employerProfile.id],
+    references: [employerSubscription.employerProfileId],
+  }),
+}));
+
+export const planRelations = relations(plan, ({ many }) => ({
+  subscriptions: many(employerSubscription),
+}));
+
+export const employerSubscriptionRelations = relations(employerSubscription, ({ one }) => ({
+  plan: one(plan, {
+    fields: [employerSubscription.planId],
+    references: [plan.id],
+  }),
+  employerProfile: one(employerProfile, {
+    fields: [employerSubscription.employerProfileId],
+    references: [employerProfile.id],
   }),
 }));
