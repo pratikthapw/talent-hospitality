@@ -46,6 +46,33 @@ export interface LedgerEntry {
   createdAt: Date;
 }
 
+export interface FullLedgerEntry extends LedgerEntry {
+  actorId: string | null;
+}
+
+/** Returns ALL ledger entries for an employer, newest first (includes actorId). */
+export async function getFullWalletHistory(
+  employerProfileId: string,
+  limit = 50,
+  offset = 0,
+): Promise<FullLedgerEntry[]> {
+  return db
+    .select({
+      id: creditLedger.id,
+      amountNpr: creditLedger.amountNpr,
+      sourceType: creditLedger.sourceType,
+      referenceId: creditLedger.referenceId,
+      reason: creditLedger.reason,
+      createdAt: creditLedger.createdAt,
+      actorId: creditLedger.actorId,
+    })
+    .from(creditLedger)
+    .where(eq(creditLedger.employerProfileId, employerProfileId))
+    .orderBy(desc(creditLedger.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
 /** Returns paginated ledger history for an employer profile, newest first. */
 export async function getLedgerHistory(
   employerProfileId: string,
