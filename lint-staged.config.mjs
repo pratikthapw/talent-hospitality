@@ -24,7 +24,7 @@ const buildOxfmtCommand = (filenames) => buildCommand("pnpm exec oxfmt", filenam
 /** @type {import("lint-staged").Configuration} */
 const config = {
   "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [buildOxlintCommand, buildOxfmtCommand],
-  "*.{json,jsonc,css,scss,html,md,mdx,yml,yaml,toml,graphql,gql}": buildOxfmtCommand,
+  "*.{json,jsonc,css,scss,html,yml,yaml,toml,graphql,gql}": buildOxfmtCommand,
 };
 
 export default config;
