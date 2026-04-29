@@ -13,7 +13,7 @@ interface AuditLogEntry {
 }
 
 function formatAction(action: string): string {
-  return action.replaceAll(/_/g, " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
+  return action.replaceAll("_", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatTargetType(type: string): string {

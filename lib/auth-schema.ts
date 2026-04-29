@@ -167,6 +167,39 @@ export const suspendedUser = pgTable(
   (table) => [index("suspended_user_userId_idx").on(table.userId)],
 );
 
+export const employerProfile = pgTable(
+  "employer_profile",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id, { onDelete: "cascade" }),
+    companyName: text("company_name").notNull(),
+    companyType: text("company_type", { enum: ["company", "individual"] }).notNull(),
+    verificationStatus: text("verification_status", {
+      enum: ["pending_review", "verified", "rejected"],
+    })
+      .notNull()
+      .default("pending_review"),
+    verificationNotes: text("verification_notes"),
+    verifiedBy: text("verified_by").references(() => user.id),
+    verifiedAt: timestamp("verified_at"),
+    verificationUpdatedAt: timestamp("verification_updated_at").defaultNow().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("employer_profile_userId_idx").on(table.userId),
+    index("employer_profile_verification_status_idx").on(table.verificationStatus),
+  ],
+);
+
 export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -178,6 +211,10 @@ export const userRelations = relations(user, ({ many, one }) => ({
   suspension: one(suspendedUser, {
     fields: [user.id],
     references: [suspendedUser.userId],
+  }),
+  employerProfile: one(employerProfile, {
+    fields: [user.id],
+    references: [employerProfile.userId],
   }),
 }));
 
@@ -236,5 +273,17 @@ export const suspendedUserRelations = relations(suspendedUser, ({ one }) => ({
     fields: [suspendedUser.unsuspendedBy],
     references: [user.id],
     relationName: "unsuspended_by_user",
+  }),
+}));
+
+export const employerProfileRelations = relations(employerProfile, ({ one }) => ({
+  user: one(user, {
+    fields: [employerProfile.userId],
+    references: [user.id],
+  }),
+  verifiedByUser: one(user, {
+    fields: [employerProfile.verifiedBy],
+    references: [user.id],
+    relationName: "employer_verified_by",
   }),
 }));
