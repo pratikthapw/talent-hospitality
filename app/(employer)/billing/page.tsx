@@ -1,13 +1,15 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Tick01Icon } from "@hugeicons/core-free-icons";
+import { Tick01Icon, Wallet02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { PlanCatalog } from "@/components/billing/plan-catalog";
 import { auth } from "@/lib/auth";
 import { getEmployerEntitlements, getPlanCatalog } from "@/lib/billing/plan-entitlement-policy";
 import type { PlanEntitlement } from "@/lib/billing/plan-entitlement-policy";
+import { getWalletBalance } from "@/lib/billing/wallet-balance";
 import { getEmployerByUserId } from "@/lib/verification/employer-verification";
 
 export const metadata = {
@@ -63,9 +65,10 @@ export default async function BillingPage() {
     );
   }
 
-  const [entitlements, plans] = await Promise.all([
+  const [entitlements, plans, walletBalance] = await Promise.all([
     getEmployerEntitlements(employer.id),
     getPlanCatalog(),
+    getWalletBalance(employer.id),
   ]);
 
   const currentPlan = plans.find((p) => p.key === entitlements.planKey) ?? plans[0];
@@ -100,15 +103,33 @@ export default async function BillingPage() {
           <div className="min-w-[200px] rounded-md bg-muted p-4">
             <div className="mb-1 text-sm font-medium text-muted-foreground">Credit Wallet</div>
             <div className="text-2xl font-bold">
-              {entitlements.monthlyCreditGrant}{" "}
-              <span className="text-sm font-normal text-muted-foreground">monthly credits</span>
+              NPR{" "}
+              {(walletBalance / 100).toLocaleString("en-NP", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
             </div>
+            {walletBalance === 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Credits are granted when a subscription payment is confirmed
+              </p>
+            )}
           </div>
         </div>
 
         <div className="mt-6 border-t pt-6">
           <h3 className="mb-3 font-semibold text-foreground">Included in your plan:</h3>
           <EntitlementList entitlements={entitlements} />
+        </div>
+
+        <div className="mt-4 border-t pt-4">
+          <Link
+            href="/employer/billing/wallet"
+            className="inline-flex items-center text-sm font-medium text-primary transition-colors hover:text-primary/80"
+          >
+            <HugeiconsIcon icon={Wallet02Icon} className="mr-1.5 h-4 w-4" />
+            View Credit Wallet &amp; History
+          </Link>
         </div>
       </div>
 

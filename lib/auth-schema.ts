@@ -259,6 +259,85 @@ export const employerSubscription = pgTable(
   ],
 );
 
+export const creditWallet = pgTable("credit_wallet", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  employerProfileId: text("employer_profile_id")
+    .notNull()
+    .unique()
+    .references(() => employerProfile.id, { onDelete: "cascade" }),
+  balanceNpr: integer("balance_npr").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const creditLedger = pgTable(
+  "credit_ledger",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    employerProfileId: text("employer_profile_id")
+      .notNull()
+      .references(() => employerProfile.id, { onDelete: "cascade" }),
+    amountNpr: integer("amount_npr").notNull(),
+    sourceType: text("source_type", {
+      enum: [
+        "signup_grant",
+        "subscription_grant",
+        "yearly_monthly_grant",
+        "top_up_purchase",
+        "admin_adjustment",
+        "admin_refund",
+      ],
+    }).notNull(),
+    referenceId: text("reference_id").notNull(),
+    reason: text("reason").notNull(),
+    actorId: text("actor_id").references(() => user.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("credit_ledger_profile_idx").on(table.employerProfileId),
+    index("credit_ledger_source_type_idx").on(table.sourceType),
+    index("credit_ledger_created_at_idx").on(table.createdAt),
+    uniqueIndex("credit_ledger_reference_id_unique").on(table.referenceId),
+  ],
+);
+
+export const subscriptionPayment = pgTable(
+  "subscription_payment",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    employerProfileId: text("employer_profile_id")
+      .notNull()
+      .references(() => employerProfile.id, { onDelete: "cascade" }),
+    subscriptionId: text("subscription_id").references(() => employerSubscription.id),
+    planId: text("plan_id")
+      .notNull()
+      .references(() => plan.id),
+    billingTerm: text("billing_term", { enum: ["monthly", "yearly"] }).notNull(),
+    amountNpr: integer("amount_npr").notNull(),
+    status: text("status", { enum: ["pending", "confirmed", "failed"] })
+      .notNull()
+      .default("pending"),
+    paymentMethod: text("payment_method"),
+    paymentRef: text("payment_ref"),
+    confirmedAt: timestamp("confirmed_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("subscription_payment_profile_idx").on(table.employerProfileId),
+    index("subscription_payment_status_idx").on(table.status),
+    index("subscription_payment_subscription_idx").on(table.subscriptionId),
+  ],
+);
+
 export const userRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
@@ -335,7 +414,7 @@ export const suspendedUserRelations = relations(suspendedUser, ({ one }) => ({
   }),
 }));
 
-export const employerProfileRelations = relations(employerProfile, ({ one }) => ({
+export const employerProfileRelations = relations(employerProfile, ({ one, many }) => ({
   user: one(user, {
     fields: [employerProfile.userId],
     references: [user.id],
@@ -349,6 +428,12 @@ export const employerProfileRelations = relations(employerProfile, ({ one }) => 
     fields: [employerProfile.id],
     references: [employerSubscription.employerProfileId],
   }),
+  wallet: one(creditWallet, {
+    fields: [employerProfile.id],
+    references: [creditWallet.employerProfileId],
+  }),
+  ledgerEntries: many(creditLedger),
+  payments: many(subscriptionPayment),
 }));
 
 export const planRelations = relations(plan, ({ many }) => ({
@@ -363,5 +448,39 @@ export const employerSubscriptionRelations = relations(employerSubscription, ({ 
   employerProfile: one(employerProfile, {
     fields: [employerSubscription.employerProfileId],
     references: [employerProfile.id],
+  }),
+}));
+
+export const creditWalletRelations = relations(creditWallet, ({ one }) => ({
+  employerProfile: one(employerProfile, {
+    fields: [creditWallet.employerProfileId],
+    references: [employerProfile.id],
+  }),
+}));
+
+export const creditLedgerRelations = relations(creditLedger, ({ one }) => ({
+  employerProfile: one(employerProfile, {
+    fields: [creditLedger.employerProfileId],
+    references: [employerProfile.id],
+  }),
+  actor: one(user, {
+    fields: [creditLedger.actorId],
+    references: [user.id],
+    relationName: "credit_ledger_actor",
+  }),
+}));
+
+export const subscriptionPaymentRelations = relations(subscriptionPayment, ({ one }) => ({
+  employerProfile: one(employerProfile, {
+    fields: [subscriptionPayment.employerProfileId],
+    references: [employerProfile.id],
+  }),
+  subscription: one(employerSubscription, {
+    fields: [subscriptionPayment.subscriptionId],
+    references: [employerSubscription.id],
+  }),
+  plan: one(plan, {
+    fields: [subscriptionPayment.planId],
+    references: [plan.id],
   }),
 }));
