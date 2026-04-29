@@ -6,6 +6,7 @@ import { Tick01Icon, Wallet02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { PlanCatalog } from "@/components/billing/plan-catalog";
+import { PlanStatusBanner } from "@/components/billing/plan-status-banner";
 import { auth } from "@/lib/auth";
 import { getEmployerEntitlements, getPlanCatalog } from "@/lib/billing/plan-entitlement-policy";
 import type { PlanEntitlement } from "@/lib/billing/plan-entitlement-policy";
@@ -86,6 +87,14 @@ export default async function BillingPage() {
         <h2 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
           Current Plan Status
         </h2>
+
+        <PlanStatusBanner
+          planKey={entitlements.planKey}
+          planName={currentPlan.displayName}
+          subscriptionStatus={entitlements.subscriptionStatus ?? null}
+          subscriptionExpiresAt={entitlements.subscriptionExpiresAt ?? null}
+          isPaid={entitlements.isPaid}
+        />
 
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>

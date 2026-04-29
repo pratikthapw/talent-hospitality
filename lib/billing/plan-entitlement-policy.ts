@@ -18,6 +18,9 @@ export interface PlanEntitlement {
   monthlyCreditGrant: number;
   isPaid: boolean;
   subscriptionActive: boolean;
+  subscriptionStatus: "active" | "expired" | "cancelled" | null;
+  subscriptionExpiresAt: Date | null;
+  billingTerm: "monthly" | "yearly" | null;
 }
 
 export const FREE_PLAN_DEFAULTS: PlanEntitlement = {
@@ -31,6 +34,9 @@ export const FREE_PLAN_DEFAULTS: PlanEntitlement = {
   monthlyCreditGrant: 0,
   isPaid: false,
   subscriptionActive: true, // Free plan is always considered active
+  subscriptionStatus: null,
+  subscriptionExpiresAt: null,
+  billingTerm: null,
 };
 
 /**
@@ -54,7 +60,12 @@ export const getEmployerEntitlements = cache(
 
     if (!isActive) {
       // Expired/cancelled: return free defaults (no paid access, credits remain per #15)
-      return { ...FREE_PLAN_DEFAULTS };
+      return {
+        ...FREE_PLAN_DEFAULTS,
+        subscriptionStatus: sub.status,
+        subscriptionExpiresAt: sub.expiresAt,
+        billingTerm: sub.billingTerm,
+      };
     }
 
     return {
@@ -68,6 +79,9 @@ export const getEmployerEntitlements = cache(
       monthlyCreditGrant: sub.plan.monthlyCreditGrant,
       isPaid: sub.plan.key !== "free",
       subscriptionActive: true,
+      subscriptionStatus: "active",
+      subscriptionExpiresAt: sub.expiresAt,
+      billingTerm: sub.billingTerm,
     };
   },
 );
