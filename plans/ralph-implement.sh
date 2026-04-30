@@ -4,34 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPT_FILE="$SCRIPT_DIR/prompt.md"
 
-if [ "${1:-}" = "" ] || [ "${2:-}" = "" ]; then
-  echo "Usage: $0 <iterations> <parent-issue-number> [--main=MODEL] [--researcher=MODEL] [--operator=MODEL] [--worker=MODEL] [--designer=MODEL] [--fixer=MODEL]"
-  echo ""
-  echo "Examples:"
-  echo "  $0 10 42"
-  echo "  $0 10 42 --main=openai/gpt-5.1"
-  echo "  $0 10 42 --researcher=google/gemini-2.5-flash --designer=google/gemini-2.5-pro"
-  echo "  $0 5 42 --fixer=google/gemini-2.5-flash"
-  echo ""
-  echo "Arguments:"
-  echo "  <iterations>            Number of implement-loop iterations to run"
-  echo "  <parent-issue-number>   GitHub issue number of the parent PRD issue (e.g. 42)"
-  echo ""
-  echo "Flags:"
-  echo "  --main=MODEL        Model for implement agent        (default: inherits from /models)"
-  echo "  --researcher=MODEL  Model for implement-researcher   (default: google/antigravity-gemini-3-flash)"
-  echo "  --operator=MODEL    Model for implement-operator     (default: inherits from main)"
-  echo "  --worker=MODEL      Model for implement-worker       (default: inherits from main)"
-  echo "  --designer=MODEL    Model for implement-designer     (default: google/antigravity-gemini-3.1-pro)"
-  echo "  --fixer=MODEL       Model for implement-fixer        (default: google/antigravity-gemini-3-flash)"
-  echo ""
-  echo "Requires: gh CLI authenticated and run from inside a GitHub repo."
-  exit 1
-fi
-
-ITERATIONS="$1"
-PARENT_ISSUE="$2"
-shift 2
+MODE="single"
+ITERATIONS=""
+PARENT_ISSUE=""
+MAX_PER_PARENT=30
 
 RESEARCHER_MODEL="google/antigravity-gemini-3-flash"
 DESIGNER_MODEL="google/antigravity-gemini-3.1-pro"
@@ -40,16 +16,73 @@ MAIN_MODEL=""
 OPERATOR_MODEL=""
 WORKER_MODEL=""
 
-for arg in "$@"; do
-  case "$arg" in
-    --main=*)       MAIN_MODEL="${arg#--main=}" ;;
-    --researcher=*) RESEARCHER_MODEL="${arg#--researcher=}" ;;
-    --operator=*)   OPERATOR_MODEL="${arg#--operator=}" ;;
-    --worker=*)     WORKER_MODEL="${arg#--worker=}" ;;
-    --designer=*)   DESIGNER_MODEL="${arg#--designer=}" ;;
-    --fixer=*)      FIXER_MODEL="${arg#--fixer=}" ;;
-  esac
-done
+show_usage() {
+  cat <<'HELP'
+Usage:
+  ralph-implement.sh <iterations> <parent-issue-number> [flags]
+  ralph-implement.sh --all [flags]
+
+Modes:
+  <iterations> <parent-issue>   Run N iterations on a single parent issue
+  --all                         Auto-discover all parents with open sub-issues,
+                                process each sequentially across cycles until all
+                                issues are closed or all remaining are blocked.
+                                Safe to leave running overnight.
+
+Flags:
+  --max-per-parent=N   Max iterations per parent in --all mode  (default: 30)
+  --main=MODEL         Model for implement agent
+  --researcher=MODEL   Model for implement-researcher
+  --operator=MODEL     Model for implement-operator
+  --worker=MODEL       Model for implement-worker
+  --designer=MODEL     Model for implement-designer
+  --fixer=MODEL        Model for implement-fixer
+
+Examples:
+  ralph-implement.sh 10 42
+  ralph-implement.sh 10 42 --main=openai/gpt-5.1
+  ralph-implement.sh --all --main=zai-coding-plan/glm-5.1 --worker=zai-coding-plan/glm-5.1
+  ralph-implement.sh --all --max-per-parent=50 --fixer=zai-coding-plan/glm-4.7
+
+Requires: gh CLI authenticated, run from inside a GitHub repo.
+HELP
+  exit 1
+}
+
+if [ $# -eq 0 ] || [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  show_usage
+fi
+
+if [ "${1:-}" = "--all" ]; then
+  MODE="all"
+  shift
+  for arg in "$@"; do
+    case "$arg" in
+      --max-per-parent=*) MAX_PER_PARENT="${arg#--max-per-parent=}" ;;
+      --main=*)       MAIN_MODEL="${arg#--main=}" ;;
+      --researcher=*) RESEARCHER_MODEL="${arg#--researcher=}" ;;
+      --operator=*)   OPERATOR_MODEL="${arg#--operator=}" ;;
+      --worker=*)     WORKER_MODEL="${arg#--worker=}" ;;
+      --designer=*)   DESIGNER_MODEL="${arg#--designer=}" ;;
+      --fixer=*)      FIXER_MODEL="${arg#--fixer=}" ;;
+    esac
+  done
+else
+  if [ -z "${1:-}" ] || [ -z "${2:-}" ]; then show_usage; fi
+  ITERATIONS="$1"
+  PARENT_ISSUE="$2"
+  shift 2
+  for arg in "$@"; do
+    case "$arg" in
+      --main=*)       MAIN_MODEL="${arg#--main=}" ;;
+      --researcher=*) RESEARCHER_MODEL="${arg#--researcher=}" ;;
+      --operator=*)   OPERATOR_MODEL="${arg#--operator=}" ;;
+      --worker=*)     WORKER_MODEL="${arg#--worker=}" ;;
+      --designer=*)   DESIGNER_MODEL="${arg#--designer=}" ;;
+      --fixer=*)      FIXER_MODEL="${arg#--fixer=}" ;;
+    esac
+  done
+fi
 
 AGENT_OVERRIDES=""
 
@@ -157,6 +190,108 @@ if ! gh auth status >/dev/null 2>&1; then
   echo "Error: gh CLI is not authenticated."
   exit 1
 fi
+
+# ──────────────────────────────────────────────
+# --all mode: discover parents, cycle until done
+# ──────────────────────────────────────────────
+if [ "$MODE" = "all" ]; then
+
+  discover_parent_issues() {
+    local tmp
+    tmp=$(mktemp -t ralph-parents 2>/dev/null) || tmp=""
+    if [ -z "$tmp" ]; then echo ""; return; fi
+    gh issue list --state open --limit 500 --json number,body > "$tmp" 2>/dev/null || echo "[]" > "$tmp"
+    node -e '
+      const fs = require("fs");
+      const items = JSON.parse(fs.readFileSync(process.argv[1], "utf8") || "[]");
+      const refs = new Set();
+      for (const item of items) {
+        const body = String(item.body || "");
+        for (const m of body.matchAll(/\bParent\s+#(\d+)/gi)) refs.add(parseInt(m[1]));
+      }
+      console.log([...refs].sort((a, b) => a - b).join(" "));
+    ' "$tmp" 2>/dev/null
+    rm -f "$tmp"
+  }
+
+  count_all_open() {
+    gh issue list --state open --limit 500 --json number --jq 'length' 2>/dev/null || echo "unknown"
+  }
+
+  MODEL_ARGS=()
+  [ -n "$MAIN_MODEL" ] && MODEL_ARGS+=("--main=$MAIN_MODEL")
+  [ -n "$RESEARCHER_MODEL" ] && MODEL_ARGS+=("--researcher=$RESEARCHER_MODEL")
+  [ -n "$OPERATOR_MODEL" ] && MODEL_ARGS+=("--operator=$OPERATOR_MODEL")
+  [ -n "$WORKER_MODEL" ] && MODEL_ARGS+=("--worker=$WORKER_MODEL")
+  [ -n "$DESIGNER_MODEL" ] && MODEL_ARGS+=("--designer=$DESIGNER_MODEL")
+  [ -n "$FIXER_MODEL" ] && MODEL_ARGS+=("--fixer=$FIXER_MODEL")
+
+  all_cleanup() {
+    echo ""
+    echo "=== --all mode interrupted at $(date) ==="
+    exit 130
+  }
+  trap all_cleanup SIGINT SIGTERM
+
+  echo "Starting AFK Ralph (--all mode) — $(date)"
+  echo "Max iterations per parent: $MAX_PER_PARENT"
+  if [ ${#MODEL_ARGS[@]} -gt 0 ]; then echo "Model flags: ${MODEL_ARGS[*]}"; fi
+  echo "---"
+
+  cycle=0
+  while true; do
+    cycle=$((cycle + 1))
+    open_before=$(count_all_open)
+    echo ""
+    echo "========== CYCLE $cycle — $(date) =========="
+    echo "Open issues: $open_before"
+
+    parents=$(discover_parent_issues)
+    if [ -z "$parents" ]; then
+      echo ""
+      echo "=== All sub-issues complete! ==="
+      remaining=$(gh issue list --state open --limit 500 --json number,title \
+        --jq '.[] | "  #\(.number) \(.title)"' 2>/dev/null || true)
+      if [ -n "$remaining" ]; then
+        echo "Remaining open issues (parents with no open children):"
+        echo "$remaining"
+      fi
+      echo "Finished at: $(date)"
+      exit 0
+    fi
+
+    echo "Parents with open sub-issues: $parents"
+    echo ""
+
+    for parent in $parents; do
+      echo "--- Processing parent #$parent (max $MAX_PER_PARENT iterations) — $(date) ---"
+      bash "$0" "$MAX_PER_PARENT" "$parent" "${MODEL_ARGS[@]}" || true
+      echo "--- Finished parent #$parent — $(date) ---"
+      echo ""
+    done
+
+    open_after=$(count_all_open)
+    echo "Cycle $cycle complete — open issues: $open_before → $open_after"
+
+    if [ "$open_after" != "unknown" ] && [ "$open_after" -eq 0 ]; then
+      echo ""
+      echo "=== All issues closed! ==="
+      echo "Finished at: $(date)"
+      exit 0
+    fi
+
+    if [ "$open_after" = "$open_before" ]; then
+      echo ""
+      echo "=== No progress in cycle $cycle — all remaining issues are blocked ==="
+      echo "Finished at: $(date)"
+      exit 1
+    fi
+  done
+fi
+
+# ──────────────────────────────────────────────
+# Single-parent mode (original behaviour)
+# ──────────────────────────────────────────────
 
 PARENT_TITLE=$(gh issue view "$PARENT_ISSUE" --json title --jq '.title' 2>/dev/null || true)
 if [ -z "$PARENT_TITLE" ]; then
@@ -450,13 +585,13 @@ ${RECENT_COMMITS}"
     if [ -n "$new_line" ]; then last_line="$new_line"; fi
     frame="${spinner_frames[$spinner_idx]}"
     printf "\r\033[K  %s  Sub-agent working… %02d:%02d  %s" \
-      "$frame" "$mins" "$secs" "$last_line"
+      "$frame" "$mins" "$secs" "$last_line" > /dev/tty
     spinner_idx=$(( (spinner_idx + 1) % ${#spinner_frames[@]} ))
     sleep 0.1
   done
   wait "$OC_PID"
   exit_code=$?
-  printf "\r\033[K"
+  printf "\r\033[K" > /dev/tty
   set -e
 
   result=$(cat "$TEMP_OUTPUT")
