@@ -13,7 +13,8 @@ export type CreditSourceType =
   | "top_up_purchase"
   | "admin_adjustment"
   | "admin_refund"
-  | "publish_cost";
+  | "publish_cost"
+  | "boost_cost";
 
 export interface AppendLedgerInput {
   employerProfileId: string;
@@ -138,6 +139,7 @@ export async function deductCredits(
     referenceId: string;
     reason: string;
     actorId?: string | null;
+    sourceType?: CreditSourceType;
   },
 ): Promise<{ balanceNpr: number }> {
   const { employerProfileId, amountNpr, referenceId, reason, actorId } = params;
@@ -165,7 +167,7 @@ export async function deductCredits(
   await tx.insert(creditLedger).values({
     employerProfileId,
     amountNpr,
-    sourceType: "publish_cost",
+    sourceType: params.sourceType ?? "publish_cost",
     referenceId,
     reason,
     actorId: actorId ?? null,

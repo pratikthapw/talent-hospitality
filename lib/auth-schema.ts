@@ -295,6 +295,7 @@ export const creditLedger = pgTable(
         "admin_adjustment",
         "admin_refund",
         "publish_cost",
+        "boost_cost",
       ],
     }).notNull(),
     referenceId: text("reference_id").notNull(),
@@ -438,6 +439,7 @@ export const employerProfileRelations = relations(employerProfile, ({ one, many 
   payments: many(subscriptionPayment),
   jobDrafts: many(jobDraft),
   postingCycles: many(jobPostingCycle),
+  boosts: many(jobBoost),
 }));
 
 export const planRelations = relations(plan, ({ many }) => ({
@@ -555,7 +557,50 @@ export const jobPostingCycle = pgTable(
   ],
 );
 
-export const jobPostingCycleRelations = relations(jobPostingCycle, ({ one }) => ({
+export const jobBoost = pgTable(
+  "job_boost",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    jobPostingCycleId: text("job_posting_cycle_id")
+      .notNull()
+      .references(() => jobPostingCycle.id, { onDelete: "cascade" }),
+    employerId: text("employer_id")
+      .notNull()
+      .references(() => employerProfile.id, { onDelete: "cascade" }),
+    boostType: text("boost_type", { enum: ["featured", "urgent"] }).notNull(),
+    costNpr: integer("cost_npr").notNull(),
+    durationDays: integer("duration_days").notNull(),
+    status: varchar("status", { length: 20 }).notNull().default("active"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("job_boost_cycle_idx").on(table.jobPostingCycleId),
+    index("job_boost_employer_idx").on(table.employerId),
+    index("job_boost_status_idx").on(table.status),
+    index("job_boost_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
+export const jobBoostRelations = relations(jobBoost, ({ one }) => ({
+  jobPostingCycle: one(jobPostingCycle, {
+    fields: [jobBoost.jobPostingCycleId],
+    references: [jobPostingCycle.id],
+  }),
+  employer: one(employerProfile, {
+    fields: [jobBoost.employerId],
+    references: [employerProfile.id],
+  }),
+}));
+
+export const jobPostingCycleRelations = relations(jobPostingCycle, ({ one, many }) => ({
   jobDraft: one(jobDraft, {
     fields: [jobPostingCycle.jobDraftId],
     references: [jobDraft.id],
@@ -564,6 +609,7 @@ export const jobPostingCycleRelations = relations(jobPostingCycle, ({ one }) => 
     fields: [jobPostingCycle.employerId],
     references: [employerProfile.id],
   }),
+  boosts: many(jobBoost),
 }));
 
 export const jobDraftRelations = relations(jobDraft, ({ one, many }) => ({
