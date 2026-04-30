@@ -168,7 +168,8 @@ RUN_ID="$(date '+%Y%m%d-%H%M%S')-parent-${PARENT_ISSUE}"
 RUN_DIR="$SCRIPT_DIR/runs/$RUN_ID"
 RUN_LOG="$RUN_DIR/ralph.log"
 mkdir -p "$RUN_DIR"
-exec > >(tee -a "$RUN_LOG") 2>&1
+exec > >(tee -ia "$RUN_LOG") 2>&1
+trap 'wait' EXIT
 
 PARENT_BRANCH=$(ensure_parent_branch "$PARENT_ISSUE" "$PARENT_TITLE")
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
