@@ -228,8 +228,20 @@ count_open_issues() {
   echo "$count"
 }
 
+fetch_open_issues_file() {
+  local tmp
+  tmp=$(mktemp -t ralph-open-set 2>/dev/null) || echo ""
+  if [ -z "$tmp" ]; then
+    echo ""
+    return
+  fi
+  gh issue list --state open --limit 500 --json number > "$tmp" 2>/dev/null || echo "[]" > "$tmp"
+  echo "$tmp"
+}
+
 select_next_issue() {
   local parent="$1"
+  local open_set_file="${2:-}"
   local tmp
   tmp=$(mktemp -t ralph-issues 2>/dev/null) || tmp=""
   if [ -z "$tmp" ]; then
@@ -247,14 +259,25 @@ select_next_issue() {
   node -e '
     const fs = require("fs");
     const items = JSON.parse(fs.readFileSync(process.argv[1], "utf8") || "[]");
+    const hasOpenSet = process.argv[2] && fs.existsSync(process.argv[2]);
+    const openSet = hasOpenSet
+      ? new Set(JSON.parse(fs.readFileSync(process.argv[2], "utf8") || "[]").map(i => i.number))
+      : null;
     const none = /^(none|n\/a|na|no|not applicable|n\.a\.|-|)$/i;
 
-    function blockedBy(body) {
+    function blockedByNums(body) {
       const text = String(body || "");
-      const match = text.match(/^\s*(?:[-*]\s*)?(?:\*\*)?Blocked by\s*:?(?:\*\*)?\s*(.+)$/im);
-      if (!match) return "";
-      const value = match[1].replace(/\*/g, "").replace(/^:\s*/, "").trim();
-      return value && !none.test(value) ? value : "";
+      const matches = [...text.matchAll(/^\s*(?:[-*]\s*)?(?:\*\*)?Blocked by\s*:?(?:\*\*)?\s*(.+)$/gim)];
+      const nums = [];
+      let hasText = false;
+      for (const match of matches) {
+        const value = match[1].replace(/\*/g, "").replace(/^:\s*/, "").trim();
+        if (!value || none.test(value)) continue;
+        hasText = true;
+        const found = value.match(/#(\d+)/g);
+        if (found) found.forEach(n => nums.push(parseInt(n.slice(1))));
+      }
+      return { nums, hasText };
     }
 
     function score(issue) {
@@ -271,8 +294,15 @@ select_next_issue() {
       return weights.reduce((total, [weight, pattern]) => total + (pattern.test(text) ? weight : 0), 0);
     }
 
-    const open = items.map((issue) => ({ ...issue, blockedBy: blockedBy(issue.body), score: score(issue) }));
-    const ready = open.filter((issue) => !issue.blockedBy);
+    const open = items.map((issue) => {
+      const blocker = blockedByNums(issue.body);
+      return { ...issue, blocker, score: score(issue) };
+    });
+    const ready = open.filter((issue) => {
+      if (!hasOpenSet) return !issue.blocker.hasText;
+      if (issue.blocker.nums.length > 0) return !issue.blocker.nums.some(n => openSet.has(n));
+      return !issue.blocker.hasText;
+    });
     if (open.length === 0) {
       console.log(JSON.stringify({ done: true, open: 0 }));
       process.exit(0);
@@ -284,14 +314,16 @@ select_next_issue() {
         blockedIssues: open.map((issue) => ({
           number: issue.number,
           title: issue.title,
-          blockedBy: issue.blockedBy,
+          blockedBy: issue.blocker.nums.length > 0
+            ? issue.blocker.nums.filter(n => !hasOpenSet || openSet.has(n)).map(n => "#" + n).join(", ")
+            : (issue.blocker.hasText ? "(text blocker)" : ""),
         })),
       }));
       process.exit(0);
     }
     ready.sort((a, b) => b.score - a.score || a.number - b.number);
     console.log(JSON.stringify(ready[0]));
-  ' "$tmp" 2>/dev/null || echo '{"error":"selection_failed"}'
+  ' "$tmp" "$open_set_file" 2>/dev/null || echo '{"error":"selection_failed"}'
   rm -f "$tmp"
 }
 
@@ -342,7 +374,9 @@ for ((i=1; i<=$ITERATIONS; i++)); do
   fi
 
   SELECTED_ISSUE_FILE="$RUN_DIR/iteration-${i}.issue.json"
-  select_next_issue "$PARENT_ISSUE" > "$SELECTED_ISSUE_FILE"
+  OPEN_SET_FILE=$(fetch_open_issues_file)
+  select_next_issue "$PARENT_ISSUE" "${OPEN_SET_FILE:-}" > "$SELECTED_ISSUE_FILE"
+  rm -f "${OPEN_SET_FILE:-}"
 
   selection_error=$(json_field "$SELECTED_ISSUE_FILE" "error")
   if [ -n "$selection_error" ]; then
