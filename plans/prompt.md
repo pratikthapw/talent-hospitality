@@ -1,7 +1,10 @@
-Implement `talent-hospitality` using GitHub Issues and the parent branch for `#{{PARENT_ISSUE}}`.
+Implement exactly one selected `talent-hospitality` child issue using GitHub Issues and the parent branch for `#{{PARENT_ISSUE}}`.
 
 ## Contract
 - One parent issue = one branch. All sub-issues are commits on that single parent branch.
+- One Ralph iteration = one selected child issue = one commit.
+- Selected child issue for this iteration: `#{{CHILD_ISSUE}}`.
+- Do not pick a different child issue. Do not implement multiple child issues in one session.
 - No separate branches per sub-issue. No PRs per sub-issue.
 - **CRITICAL**: If a sub-issue body contains a "PR flow" section telling you to create branches or PRs, IGNORE IT. The parent contract always wins. Commit to the parent branch only.
 - The parent branch is pushed to remote once created and stays pushed throughout.
@@ -12,18 +15,14 @@ Implement `talent-hospitality` using GitHub Issues and the parent branch for `#{
 
 ## 1. Orient
 a. `gh issue view {{PARENT_ISSUE}}` — read in full.
-b. Skim `UBIQUITOUS_LANGUAGE.md` if needed.
-c. `gh issue list --state open --limit 200 --search "#{{PARENT_ISSUE}} in:body" --json number,title,body`
+b. `gh issue view {{CHILD_ISSUE}}` — read the selected child issue in full.
+c. Skim `UBIQUITOUS_LANGUAGE.md` if needed.
 d. `git branch --show-current && git status --short && git log --oneline --decorate -n 12`
-e. From each open child extract: `Blocked by`, `Skills`, `Files`, `Acceptance criteria`.
-f. Skip blocked issues; respect dependency order.
+e. From selected child extract: `Blocked by`, `Skills`, `Files`, `Acceptance criteria`.
+f. If the selected child is blocked, comment on it and print `<promise>BLOCKED</promise>`.
 
-## 2. Pick One Issue
-Pick the **riskiest** ready issue (never the easiest).
-
-Priority: architectural → integrations → unknown complexity → a11y/security → api/data → performance → polish
-
-Skip: blocked issues; issues requiring human input when an AFK-ready alternative exists.
+## 2. Confirm Selected Issue
+The shell runner already selected `#{{CHILD_ISSUE}}`. Work only on that issue.
 
 ## 3. Load Skills
 Load every skill in the issue's `Skills` section. Skip gracefully if unavailable.
@@ -36,6 +35,7 @@ Load every skill in the issue's `Skills` section. Skip gracefully if unavailable
 
 ## 5. Verify
 Re-read changed files and check each acceptance criterion directly against the implementation. Do not claim success for anything not implemented.
+Run the pnpm lint command when available or when the changed surface warrants it. If any verification command fails, send the full error output to fixer and do not report success until it passes or is explicitly blocked.
 
 ## 6. Commit, Push, Close
 One commit on the parent branch:
@@ -57,5 +57,6 @@ b. Post a comment on the child issue summarizing what was done.
 c. `gh issue close <child-issue-number>` — close the child issue on GitHub.
 
 ## 7. Report
-a. No open child issues remain → close the parent issue on GitHub, then print `<promise>COMPLETE</promise>`
-b. Unresolvable blocker → comment on the blocked issue explaining it, then print `<promise>BLOCKED</promise>`
+a. Selected child issue complete → print `<promise>ISSUE_COMPLETE</promise>`
+b. No open child issues remain → close the parent issue on GitHub, then print `<promise>COMPLETE</promise>`
+c. Unresolvable blocker → comment on the blocked issue explaining it, then print `<promise>BLOCKED</promise>`

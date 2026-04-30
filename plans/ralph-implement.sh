@@ -5,12 +5,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPT_FILE="$SCRIPT_DIR/prompt.md"
 
 if [ "${1:-}" = "" ] || [ "${2:-}" = "" ]; then
-  echo "Usage: $0 <iterations> <parent-issue-number> [--main=MODEL] [--explorer=MODEL] [--librarian=MODEL] [--worker=MODEL] [--designer=MODEL] [--fixer=MODEL]"
+  echo "Usage: $0 <iterations> <parent-issue-number> [--main=MODEL] [--researcher=MODEL] [--operator=MODEL] [--worker=MODEL] [--designer=MODEL] [--fixer=MODEL]"
   echo ""
   echo "Examples:"
   echo "  $0 10 42"
   echo "  $0 10 42 --main=openai/gpt-5.1"
-  echo "  $0 10 42 --explorer=google/gemini-2.5-flash --designer=google/gemini-2.5-pro"
+  echo "  $0 10 42 --researcher=google/gemini-2.5-flash --designer=google/gemini-2.5-pro"
   echo "  $0 5 42 --fixer=google/gemini-2.5-flash"
   echo ""
   echo "Arguments:"
@@ -18,12 +18,12 @@ if [ "${1:-}" = "" ] || [ "${2:-}" = "" ]; then
   echo "  <parent-issue-number>   GitHub issue number of the parent PRD issue (e.g. 42)"
   echo ""
   echo "Flags:"
-  echo "  --main=MODEL        Model for implement agent       (default: inherits from /models)"
-  echo "  --explorer=MODEL    Model for implement-explorer    (default: google/antigravity-gemini-3-flash)"
-  echo "  --librarian=MODEL   Model for implement-librarian   (default: google/antigravity-gemini-3-flash)"
-  echo "  --worker=MODEL      Model for implement-worker      (default: inherits from main)"
-  echo "  --designer=MODEL    Model for implement-designer    (default: google/antigravity-gemini-3.1-pro)"
-  echo "  --fixer=MODEL       Model for implement-fixer       (default: google/antigravity-gemini-3-flash)"
+  echo "  --main=MODEL        Model for implement agent        (default: inherits from /models)"
+  echo "  --researcher=MODEL  Model for implement-researcher   (default: google/antigravity-gemini-3-flash)"
+  echo "  --operator=MODEL    Model for implement-operator     (default: inherits from main)"
+  echo "  --worker=MODEL      Model for implement-worker       (default: inherits from main)"
+  echo "  --designer=MODEL    Model for implement-designer     (default: google/antigravity-gemini-3.1-pro)"
+  echo "  --fixer=MODEL       Model for implement-fixer        (default: google/antigravity-gemini-3-flash)"
   echo ""
   echo "Requires: gh CLI authenticated and run from inside a GitHub repo."
   exit 1
@@ -33,32 +33,32 @@ ITERATIONS="$1"
 PARENT_ISSUE="$2"
 shift 2
 
-EXPLORER_MODEL="google/antigravity-gemini-3-flash"
-LIBRARIAN_MODEL="google/antigravity-gemini-3-flash"
+RESEARCHER_MODEL="google/antigravity-gemini-3-flash"
 DESIGNER_MODEL="google/antigravity-gemini-3.1-pro"
 FIXER_MODEL="google/antigravity-gemini-3-flash"
 MAIN_MODEL=""
+OPERATOR_MODEL=""
 WORKER_MODEL=""
 
 for arg in "$@"; do
   case "$arg" in
-    --main=*)      MAIN_MODEL="${arg#--main=}" ;;
-    --explorer=*)  EXPLORER_MODEL="${arg#--explorer=}" ;;
-    --librarian=*) LIBRARIAN_MODEL="${arg#--librarian=}" ;;
-    --worker=*)    WORKER_MODEL="${arg#--worker=}" ;;
-    --designer=*)  DESIGNER_MODEL="${arg#--designer=}" ;;
-    --fixer=*)     FIXER_MODEL="${arg#--fixer=}" ;;
+    --main=*)       MAIN_MODEL="${arg#--main=}" ;;
+    --researcher=*) RESEARCHER_MODEL="${arg#--researcher=}" ;;
+    --operator=*)   OPERATOR_MODEL="${arg#--operator=}" ;;
+    --worker=*)     WORKER_MODEL="${arg#--worker=}" ;;
+    --designer=*)   DESIGNER_MODEL="${arg#--designer=}" ;;
+    --fixer=*)      FIXER_MODEL="${arg#--fixer=}" ;;
   esac
 done
 
 AGENT_OVERRIDES=""
 
-if [ -n "$EXPLORER_MODEL" ]; then
-  AGENT_OVERRIDES="${AGENT_OVERRIDES}\"implement-explorer\":{\"model\":\"${EXPLORER_MODEL}\"},"
+if [ -n "$RESEARCHER_MODEL" ]; then
+  AGENT_OVERRIDES="${AGENT_OVERRIDES}\"implement-researcher\":{\"model\":\"${RESEARCHER_MODEL}\"},"
 fi
 
-if [ -n "$LIBRARIAN_MODEL" ]; then
-  AGENT_OVERRIDES="${AGENT_OVERRIDES}\"implement-librarian\":{\"model\":\"${LIBRARIAN_MODEL}\"},"
+if [ -n "$OPERATOR_MODEL" ]; then
+  AGENT_OVERRIDES="${AGENT_OVERRIDES}\"implement-operator\":{\"model\":\"${OPERATOR_MODEL}\"},"
 fi
 
 if [ -n "$WORKER_MODEL" ]; then
@@ -164,6 +164,12 @@ if [ -z "$PARENT_TITLE" ]; then
   exit 1
 fi
 
+RUN_ID="$(date '+%Y%m%d-%H%M%S')-parent-${PARENT_ISSUE}"
+RUN_DIR="$SCRIPT_DIR/runs/$RUN_ID"
+RUN_LOG="$RUN_DIR/ralph.log"
+mkdir -p "$RUN_DIR"
+exec > >(tee -a "$RUN_LOG") 2>&1
+
 PARENT_BRANCH=$(ensure_parent_branch "$PARENT_ISSUE" "$PARENT_TITLE")
 CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
 RECENT_COMMITS=$(git log --oneline --decorate -n 12 2>/dev/null || true)
@@ -172,8 +178,8 @@ RECENT_COMMITS=$(git log --oneline --decorate -n 12 2>/dev/null || true)
 rm -f /tmp/ralph-issues.* /tmp/ralph-iter.*
 
 BASE_PROMPT=$(cat "$PROMPT_FILE")
-PROMPT=$(echo "$BASE_PROMPT" | sed "s/{{PARENT_ISSUE}}/${PARENT_ISSUE}/g")
-PROMPT="${PROMPT}
+PROMPT_TEMPLATE=$(echo "$BASE_PROMPT" | sed "s/{{PARENT_ISSUE}}/${PARENT_ISSUE}/g")
+PROMPT_BASE="${PROMPT_TEMPLATE}
 
 - Parent PRD issue: #${PARENT_ISSUE} — ${PARENT_TITLE}
 - Parent branch: ${PARENT_BRANCH}
@@ -190,9 +196,10 @@ cleanup() {
     kill "$OC_PID" 2>/dev/null && wait "$OC_PID" 2>/dev/null
   fi
   if [ -n "${TEMP_OUTPUT:-}" ] && [ -f "$TEMP_OUTPUT" 2>/dev/null ]; then
-    rm -f "$TEMP_OUTPUT"
+    echo "Output retained at: $TEMP_OUTPUT"
   fi
   echo "Stopped at: $(date)"
+  echo "Run log: $RUN_LOG"
   echo ""
   echo "Note: Orphaned opencode sessions may still exist."
   echo "  Check:  opencode session list -n 10"
@@ -220,15 +227,95 @@ count_open_issues() {
   echo "$count"
 }
 
+select_next_issue() {
+  local parent="$1"
+  local tmp
+  tmp=$(mktemp -t ralph-issues 2>/dev/null) || tmp=""
+  if [ -z "$tmp" ]; then
+    echo '{"error":"mktemp_failed"}'
+    return
+  fi
+
+  if ! gh issue list --state open --limit 200 --search "\"Parent\" \"#${parent}\" in:body" --json number,title,body,updatedAt \
+    > "$tmp" 2>/dev/null; then
+    rm -f "$tmp"
+    echo '{"error":"issue_list_failed"}'
+    return
+  fi
+
+  node -e '
+    const fs = require("fs");
+    const items = JSON.parse(fs.readFileSync(process.argv[1], "utf8") || "[]");
+    const none = /^(none|n\/a|na|no|not applicable|n\.a\.|-|)$/i;
+
+    function blockedBy(body) {
+      const text = String(body || "");
+      const match = text.match(/^\s*(?:[-*]\s*)?(?:\*\*)?Blocked by\s*:?(?:\*\*)?\s*(.+)$/im);
+      if (!match) return "";
+      const value = match[1].replace(/\*/g, "").replace(/^:\s*/, "").trim();
+      return value && !none.test(value) ? value : "";
+    }
+
+    function score(issue) {
+      const text = `${issue.title || ""}\n${issue.body || ""}`.toLowerCase();
+      const weights = [
+        [100, /\b(architecture|architectural|schema|migration|entitlement|policy)\b/],
+        [90, /\b(integration|payment|stripe|checkout|webhook|subscription|billing)\b/],
+        [80, /\b(unknown|risk|complex|dependency|blocked)\b/],
+        [70, /\b(security|a11y|accessibility|permission|auth|authorization)\b/],
+        [60, /\b(api|data|database|db|query|ledger|wallet|credit)\b/],
+        [40, /\b(performance|cache|latency|slow)\b/],
+        [10, /\b(polish|copy|style|visual|ui)\b/],
+      ];
+      return weights.reduce((total, [weight, pattern]) => total + (pattern.test(text) ? weight : 0), 0);
+    }
+
+    const open = items.map((issue) => ({ ...issue, blockedBy: blockedBy(issue.body), score: score(issue) }));
+    const ready = open.filter((issue) => !issue.blockedBy);
+    if (open.length === 0) {
+      console.log(JSON.stringify({ done: true, open: 0 }));
+      process.exit(0);
+    }
+    if (ready.length === 0) {
+      console.log(JSON.stringify({
+        blocked: true,
+        open: open.length,
+        blockedIssues: open.map((issue) => ({
+          number: issue.number,
+          title: issue.title,
+          blockedBy: issue.blockedBy,
+        })),
+      }));
+      process.exit(0);
+    }
+    ready.sort((a, b) => b.score - a.score || a.number - b.number);
+    console.log(JSON.stringify(ready[0]));
+  ' "$tmp" 2>/dev/null || echo '{"error":"selection_failed"}'
+  rm -f "$tmp"
+}
+
+json_field() {
+  local file="$1"
+  local field="$2"
+  node -e "
+    const fs = require('fs');
+    const data = JSON.parse(fs.readFileSync(process.argv[1], 'utf8') || '{}');
+    const value = data[process.argv[2]];
+    process.stdout.write(value == null ? '' : String(value));
+  " "$file" "$field"
+}
+
 echo "Starting AFK Ralph (implement agent) — max $ITERATIONS iterations"
 echo "Parent PRD issue: #${PARENT_ISSUE} — $PARENT_TITLE"
 echo "Parent branch: $PARENT_BRANCH"
 echo "Started at: $(date)"
 echo "PID: $$"
 echo "Prompt: $PROMPT_FILE"
+echo "Run directory: $RUN_DIR"
+echo "Run log: $RUN_LOG"
 echo "Models:"
-echo "  explorer:  $EXPLORER_MODEL"
-echo "  librarian: $LIBRARIAN_MODEL"
+echo "  researcher: $RESEARCHER_MODEL"
+if [ -n "$OPERATOR_MODEL" ]; then echo "  operator:   $OPERATOR_MODEL"; else echo "  operator:   (inherits from main)"; fi
 echo "  designer:  $DESIGNER_MODEL"
 echo "  fixer:     $FIXER_MODEL"
 if [ -n "$MAIN_MODEL" ]; then echo "  main:      $MAIN_MODEL"; else echo "  main:      (inherits from /models)"; fi
@@ -253,13 +340,67 @@ for ((i=1; i<=$ITERATIONS; i++)); do
     exit 0
   fi
 
-  set +e
-  TEMP_OUTPUT=$(mktemp -t ralph-iter 2>/dev/null) || TEMP_OUTPUT=""
-  if [ -z "$TEMP_OUTPUT" ]; then
-    echo "Error: cannot create temp file"
+  SELECTED_ISSUE_FILE="$RUN_DIR/iteration-${i}.issue.json"
+  select_next_issue "$PARENT_ISSUE" > "$SELECTED_ISSUE_FILE"
+
+  selection_error=$(json_field "$SELECTED_ISSUE_FILE" "error")
+  if [ -n "$selection_error" ]; then
+    echo "Error selecting next issue: $selection_error"
+    echo "Selection payload: $SELECTED_ISSUE_FILE"
     exit 1
   fi
-  opencode run --agent implement "$PROMPT" > "$TEMP_OUTPUT" 2>&1 &
+
+  selection_done=$(json_field "$SELECTED_ISSUE_FILE" "done")
+  if [ "$selection_done" = "true" ]; then
+    echo ""
+    echo "=== All issues complete after $((i - 1)) iterations ==="
+    gh issue close "$PARENT_ISSUE" --comment "All sub-issues complete. Branch \`$PARENT_BRANCH\` is ready for review." 2>/dev/null || true
+    echo "Finished at: $(date)"
+    exit 0
+  fi
+
+  selection_blocked=$(json_field "$SELECTED_ISSUE_FILE" "blocked")
+  if [ "$selection_blocked" = "true" ]; then
+    echo ""
+    echo "=== Ralph is blocked — no ready child issues ==="
+    echo "Selection payload: $SELECTED_ISSUE_FILE"
+    echo "Stopped at: $(date)"
+    exit 1
+  fi
+
+  selected_issue_number=$(json_field "$SELECTED_ISSUE_FILE" "number")
+  selected_issue_title=$(json_field "$SELECTED_ISSUE_FILE" "title")
+  selected_issue_body=$(json_field "$SELECTED_ISSUE_FILE" "body")
+
+  if [ -z "$selected_issue_number" ]; then
+    echo "Error: selected issue has no number."
+    echo "Selection payload: $SELECTED_ISSUE_FILE"
+    exit 1
+  fi
+
+  echo "Selected child issue: #${selected_issue_number} — ${selected_issue_title}"
+  echo "Selected issue payload: $SELECTED_ISSUE_FILE"
+
+  RECENT_COMMITS=$(git log --oneline --decorate -n 12 2>/dev/null || true)
+  ITERATION_PROMPT=$(echo "$PROMPT_BASE" | sed "s/{{CHILD_ISSUE}}/${selected_issue_number}/g")
+  ITERATION_PROMPT="${ITERATION_PROMPT}
+
+- Current iteration: ${i} of ${ITERATIONS}
+- Selected child issue: #${selected_issue_number} — ${selected_issue_title}
+- Selected child issue body:
+${selected_issue_body}
+- Current recent commits:
+${RECENT_COMMITS}"
+
+  ITERATION_PROMPT_FILE="$RUN_DIR/iteration-${i}.prompt.md"
+  printf '%s\n' "$ITERATION_PROMPT" > "$ITERATION_PROMPT_FILE"
+  echo "Iteration prompt: $ITERATION_PROMPT_FILE"
+
+  set +e
+  TEMP_OUTPUT="$RUN_DIR/iteration-${i}.opencode.log"
+  : > "$TEMP_OUTPUT"
+  before_head=$(git rev-parse HEAD 2>/dev/null || echo "")
+  opencode run --agent implement "$ITERATION_PROMPT" > "$TEMP_OUTPUT" 2>&1 &
   OC_PID=$!
 
   spinner_frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
@@ -284,11 +425,23 @@ for ((i=1; i<=$ITERATIONS; i++)); do
   set -e
 
   result=$(cat "$TEMP_OUTPUT")
+  after_head=$(git rev-parse HEAD 2>/dev/null || echo "")
 
   echo "--- stream end ---"
   echo "Exit code: $exit_code"
+  echo "Iteration output: $TEMP_OUTPUT"
 
-  subagent_models=$(echo "$result" | grep -oE '> [^ ]+ · [^ ]+' | sort -u)
+  if [ -n "$before_head" ] && [ -n "$after_head" ] && [ "$before_head" != "$after_head" ]; then
+    commit_count=$(git rev-list --count "${before_head}..${after_head}" 2>/dev/null || echo "unknown")
+    echo "Commits created this iteration: $commit_count"
+    if [ "$commit_count" != "1" ]; then
+      echo "Warning: expected exactly 1 commit for issue #${selected_issue_number}."
+    fi
+  else
+    echo "Commits created this iteration: 0"
+  fi
+
+  subagent_models=$(printf '%s\n' "$result" | grep -oE '> [^ ]+ · [^ ]+' | sort -u || true)
   echo "Models seen in output:"
   if [ -n "$subagent_models" ]; then
     echo "$subagent_models"
@@ -299,14 +452,10 @@ for ((i=1; i<=$ITERATIONS; i++)); do
 
   git push origin "$PARENT_BRANCH" 2>/dev/null || echo "Push: nothing new or already up to date"
 
-  rm -f "$TEMP_OUTPUT"
+  issues_remaining_after=$(count_open_issues "$PARENT_ISSUE")
+  echo "Open sub-issues after iteration: $issues_remaining_after"
 
-  if [ $exit_code -ne 0 ]; then
-    echo "Warning: opencode exited with code $exit_code on iteration $i — continuing to next iteration..."
-    continue
-  fi
-
-  if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
+  if [ "$issues_remaining_after" = "0" ]; then
     echo ""
     echo "=== Issues complete after $i iterations ==="
     gh issue close "$PARENT_ISSUE" --comment "All sub-issues complete. Branch \`$PARENT_BRANCH\` is ready for review." 2>/dev/null || true
@@ -322,6 +471,23 @@ for ((i=1; i<=$ITERATIONS; i++)); do
     echo "Stopped at: $(date)"
     exit 1
   fi
+
+  if [ $exit_code -ne 0 ]; then
+    echo "Warning: opencode exited with code $exit_code on iteration $i — continuing to next iteration..."
+    continue
+  fi
+
+  if [[ "$result" == *"<promise>ISSUE_COMPLETE</promise>"* ]]; then
+    echo "Issue #${selected_issue_number} complete; continuing to next iteration."
+    continue
+  fi
+
+  if [[ "$result" == *"<promise>COMPLETE</promise>"* ]]; then
+    echo "Completion token emitted, but open sub-issues remain; continuing."
+    continue
+  fi
+
+  echo "Warning: no completion token found for issue #${selected_issue_number}; continuing so the open-issue list remains source of truth."
 
 done
 
