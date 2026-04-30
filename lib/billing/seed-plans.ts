@@ -7,6 +7,7 @@ type PlanInsert = InferInsertModel<typeof plan>;
 
 const PLANS: PlanInsert[] = [
   {
+    id: "plan_free",
     key: "free",
     displayName: "Free",
     description: "Start hiring with basic features at no cost.",
@@ -20,6 +21,7 @@ const PLANS: PlanInsert[] = [
     sortOrder: 0,
   },
   {
+    id: "plan_pro",
     key: "pro",
     displayName: "Pro",
     description: "More job slots, candidate search, and monthly credits for growing teams.",
@@ -33,6 +35,7 @@ const PLANS: PlanInsert[] = [
     sortOrder: 1,
   },
   {
+    id: "plan_premium",
     key: "premium",
     displayName: "Premium",
     description: "Higher limits, more credits, and priority features for active hiring.",
@@ -46,6 +49,7 @@ const PLANS: PlanInsert[] = [
     sortOrder: 2,
   },
   {
+    id: "plan_enterprise",
     key: "enterprise",
     displayName: "Enterprise",
     description:

@@ -1,7 +1,9 @@
 import "server-only";
 import { eq, desc, and } from "drizzle-orm";
+import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
-import { creditLedger } from "../auth-schema";
+import { creditLedger, creditWallet } from "../auth-schema";
+import type * as schema from "../auth-schema";
 import { db } from "../db";
 
 export type CreditSourceType =
@@ -10,7 +12,8 @@ export type CreditSourceType =
   | "yearly_monthly_grant"
   | "top_up_purchase"
   | "admin_adjustment"
-  | "admin_refund";
+  | "admin_refund"
+  | "publish_cost";
 
 export interface AppendLedgerInput {
   employerProfileId: string;
@@ -120,4 +123,60 @@ export async function getSubscriptionGrantHistory(
     .orderBy(desc(creditLedger.createdAt))
     .limit(limit)
     .offset(offset);
+}
+
+/**
+ * Deduct credits for a publish action within an existing transaction.
+ * Amount should be NEGATIVE (e.g. -500).
+ * Uses the wallet row-lock pattern for concurrent safety.
+ */
+export async function deductCredits(
+  tx: NodePgDatabase<typeof schema>,
+  params: {
+    employerProfileId: string;
+    amountNpr: number;
+    referenceId: string;
+    reason: string;
+    actorId?: string | null;
+  },
+): Promise<{ balanceNpr: number }> {
+  const { employerProfileId, amountNpr, referenceId, reason, actorId } = params;
+
+  // Lock wallet row for concurrent safety
+  const walletResults = await tx
+    .select()
+    .from(creditWallet)
+    .where(eq(creditWallet.employerProfileId, employerProfileId))
+    .for("update");
+
+  if (walletResults.length === 0) {
+    throw new Error("Credit wallet not found. Ensure the employer has a wallet before publishing.");
+  }
+
+  const wallet = walletResults[0];
+
+  if (wallet.balanceNpr + amountNpr < 0) {
+    throw new Error(
+      `Insufficient credits. Current balance: ${wallet.balanceNpr}, required: ${Math.abs(amountNpr)}.`,
+    );
+  }
+
+  // Append ledger entry (negative amount)
+  await tx.insert(creditLedger).values({
+    employerProfileId,
+    amountNpr,
+    sourceType: "publish_cost",
+    referenceId,
+    reason,
+    actorId: actorId ?? null,
+  });
+
+  // Update wallet balance
+  const newBalance = wallet.balanceNpr + amountNpr;
+  await tx
+    .update(creditWallet)
+    .set({ balanceNpr: newBalance, updatedAt: new Date() })
+    .where(eq(creditWallet.employerProfileId, employerProfileId));
+
+  return { balanceNpr: newBalance };
 }
