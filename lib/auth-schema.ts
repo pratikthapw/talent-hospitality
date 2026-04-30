@@ -8,6 +8,7 @@ import {
   json,
   index,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
@@ -434,6 +435,7 @@ export const employerProfileRelations = relations(employerProfile, ({ one, many 
   }),
   ledgerEntries: many(creditLedger),
   payments: many(subscriptionPayment),
+  jobDrafts: many(jobDraft),
 }));
 
 export const planRelations = relations(plan, ({ many }) => ({
@@ -482,5 +484,50 @@ export const subscriptionPaymentRelations = relations(subscriptionPayment, ({ on
   plan: one(plan, {
     fields: [subscriptionPayment.planId],
     references: [plan.id],
+  }),
+}));
+
+// --- Job Posting Tables ---
+
+export const jobDraft = pgTable(
+  "job_draft",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    employerId: text("employer_id")
+      .notNull()
+      .references(() => employerProfile.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    location: text("location").notNull(),
+    // Values: "full-time", "part-time", "contract", "seasonal", "internship"
+    employmentType: varchar("employment_type", { length: 50 }).notNull(),
+    salaryMin: integer("salary_min"),
+    salaryMax: integer("salary_max"),
+    salaryCurrency: varchar("salary_currency", { length: 3 }).default("USD"),
+    salaryPeriod: varchar("salary_period", { length: 20 }),
+    requirements: text("requirements"),
+    benefits: text("benefits"),
+    // draft → published → expired/closed
+    status: varchar("status", { length: 20 }).notNull().default("draft"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("job_draft_employer_id_idx").on(table.employerId),
+    index("job_draft_status_idx").on(table.status),
+  ],
+);
+
+export const jobDraftRelations = relations(jobDraft, ({ one }) => ({
+  employer: one(employerProfile, {
+    fields: [jobDraft.employerId],
+    references: [employerProfile.id],
   }),
 }));
