@@ -171,6 +171,7 @@ export const cvDocument = pgTable(
     // Status
     isActive: boolean("is_active").notNull().default(false),
     replacedAt: timestamp("replaced_at"),
+    retentionExpiresAt: timestamp("retention_expires_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -181,6 +182,7 @@ export const cvDocument = pgTable(
     index("cv_document_employee_profile_id_idx").on(table.employeeProfileId),
     index("cv_document_is_active_idx").on(table.isActive),
     index("cv_document_replaced_at_idx").on(table.replacedAt),
+    index("cv_document_retention_expires_at_idx").on(table.retentionExpiresAt),
   ],
 );
 

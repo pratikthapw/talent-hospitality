@@ -38,12 +38,13 @@ export async function getAllCVs(employeeProfileId: string) {
  * Deactivate any currently active CVs for the given employee profile.
  * Sets replacedAt timestamp on the deactivated CV (starts the 60-day retention window).
  */
-async function deactivateActiveCVs(employeeProfileId: string): Promise<void> {
+export async function deactivateActiveCVs(employeeProfileId: string): Promise<void> {
   await db
     .update(cvDocument)
     .set({
       isActive: false,
       replacedAt: new Date(),
+      retentionExpiresAt: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
     })
     .where(and(eq(cvDocument.employeeProfileId, employeeProfileId), eq(cvDocument.isActive, true)));
 }
