@@ -139,6 +139,7 @@ export const employeeProfile = pgTable(
     verifiedBy: text("verified_by").references(() => user.id),
     verifiedAt: timestamp("verified_at"),
     verificationUpdatedAt: timestamp("verification_updated_at").defaultNow().notNull(),
+    searchVisible: boolean("search_visible").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
