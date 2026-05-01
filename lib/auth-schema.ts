@@ -547,6 +547,10 @@ export const jobPostingCycle = pgTable(
     publishedAt: timestamp("published_at", { withTimezone: true }).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     closedAt: timestamp("closed_at", { withTimezone: true }),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Drizzle ORM reference pattern
+    previousCycleId: text("previous_cycle_id").references((): any => jobPostingCycle.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
@@ -554,6 +558,7 @@ export const jobPostingCycle = pgTable(
     index("job_posting_cycle_employer_id_idx").on(table.employerId),
     index("job_posting_cycle_status_idx").on(table.status),
     index("job_posting_cycle_expires_at_idx").on(table.expiresAt),
+    index("job_posting_cycle_previous_cycle_id_idx").on(table.previousCycleId),
   ],
 );
 
@@ -609,6 +614,12 @@ export const jobPostingCycleRelations = relations(jobPostingCycle, ({ one, many 
     fields: [jobPostingCycle.employerId],
     references: [employerProfile.id],
   }),
+  previousCycle: one(jobPostingCycle, {
+    fields: [jobPostingCycle.previousCycleId],
+    references: [jobPostingCycle.id],
+    relationName: "cycle_lineage",
+  }),
+  republishedCycles: many(jobPostingCycle, { relationName: "cycle_lineage" }),
   boosts: many(jobBoost),
 }));
 

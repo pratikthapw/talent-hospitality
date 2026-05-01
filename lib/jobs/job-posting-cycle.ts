@@ -1,5 +1,5 @@
 import "server-only";
-import { eq, and, desc, count } from "drizzle-orm";
+import { eq, and, desc, count, sql } from "drizzle-orm";
 
 import { jobDraft, jobPostingCycle, employerProfile } from "@/lib/auth-schema";
 import { deductCredits } from "@/lib/billing/credit-ledger";
@@ -182,4 +182,263 @@ export async function getPublishedJobs(limit = 50, offset = 0): Promise<Publishe
     .orderBy(desc(jobPostingCycle.publishedAt))
     .limit(limit)
     .offset(offset);
+}
+
+// --- Republish ---
+
+export interface RepublishJobInput {
+  jobDraftId: string;
+  employerProfileId: string;
+  durationDays: JobDurationDays;
+  userId: string;
+}
+
+export interface RepublishJobResult {
+  success: boolean;
+  cycleId?: string;
+  balanceNpr?: number;
+  error?: string;
+}
+
+/**
+ * Republish an expired or closed job as a new posting cycle.
+ * Preserves prior cycles via the previousCycleId lineage link.
+ */
+export async function republishJob(input: RepublishJobInput): Promise<RepublishJobResult> {
+  const { jobDraftId, employerProfileId, durationDays, userId } = input;
+
+  // 1. Validate duration
+  if (!JOB_DURATION_OPTIONS.includes(durationDays)) {
+    return {
+      success: false,
+      error: `Invalid duration. Choose from: ${JOB_DURATION_OPTIONS.join(", ")} days.`,
+    };
+  }
+
+  // 2. Load the draft and verify ownership + status
+  const draftResults = await db
+    .select()
+    .from(jobDraft)
+    .where(and(eq(jobDraft.id, jobDraftId), eq(jobDraft.employerId, employerProfileId)));
+
+  const draft = draftResults.at(0);
+
+  if (draft === undefined) {
+    return { success: false, error: "Job draft not found or you do not own it." };
+  }
+
+  if (draft.status !== "expired" && draft.status !== "closed") {
+    return { success: false, error: "Only expired or closed jobs can be republished." };
+  }
+
+  // 3. Validate publish fields
+  const fieldErrors = validatePublishFields(draft);
+  if (fieldErrors.length > 0) {
+    const messages = fieldErrors.map((e) => `${e.field}: ${e.message}`).join("; ");
+    return { success: false, error: `Missing required fields: ${messages}` };
+  }
+
+  // 4. Check entitlements
+  const entitlements = await getEmployerEntitlements(employerProfileId);
+  if (!entitlements.canPublishJobs) {
+    return { success: false, error: "Your current plan does not allow publishing jobs." };
+  }
+
+  // 5. Find the most recent cycle for lineage linking
+  const recentCycles = await db
+    .select({ id: jobPostingCycle.id })
+    .from(jobPostingCycle)
+    .where(eq(jobPostingCycle.jobDraftId, jobDraftId))
+    .orderBy(desc(jobPostingCycle.createdAt))
+    .limit(1);
+
+  const previousCycleId = recentCycles.at(0)?.id ?? null;
+
+  // 6. Transaction: check limit, deduct credits, create cycle, update draft
+  const referenceId = `republish_${jobDraftId}_${Date.now()}`;
+
+  try {
+    const result = await db.transaction(async (tx) => {
+      // 6a. Count active cycles inside transaction
+      const [activeCount] = await tx
+        .select({ count: count() })
+        .from(jobPostingCycle)
+        .where(
+          and(
+            eq(jobPostingCycle.employerId, employerProfileId),
+            eq(jobPostingCycle.status, "active"),
+          ),
+        );
+
+      if (activeCount.count >= entitlements.maxPublishedJobs) {
+        throw new Error(
+          `Published job limit reached (${entitlements.maxPublishedJobs}). Close or wait for existing jobs to expire.`,
+        );
+      }
+
+      // 6b. Deduct credits
+      const { balanceNpr } = await deductCredits(tx, {
+        employerProfileId,
+        amountNpr: -PUBLISH_COST_NPR,
+        referenceId,
+        reason: `Republish job: ${draft.title} (${durationDays} days)`,
+        actorId: userId,
+      });
+
+      // 6c. Calculate timestamps
+      const now = new Date();
+      const expiresAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+
+      // 6d. Create new Job Posting Cycle
+      const [cycle] = await tx
+        .insert(jobPostingCycle)
+        .values({
+          jobDraftId,
+          employerId: employerProfileId,
+          durationDays,
+          costNpr: PUBLISH_COST_NPR,
+          status: "active",
+          publishedAt: now,
+          expiresAt,
+          previousCycleId,
+        })
+        .returning();
+
+      // 6e. Update draft status back to published
+      await tx
+        .update(jobDraft)
+        .set({ status: "published", publishedAt: now, expiresAt, updatedAt: now })
+        .where(eq(jobDraft.id, jobDraftId));
+
+      return { cycleId: cycle.id, balanceNpr };
+    });
+
+    return { success: true, cycleId: result.cycleId, balanceNpr: result.balanceNpr };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to republish job.";
+    return { success: false, error: message };
+  }
+}
+
+// --- Cycle Lineage ---
+
+export interface CycleLineageEntry {
+  id: string;
+  status: string;
+  publishedAt: Date;
+  expiresAt: Date;
+  closedAt: Date | null;
+  durationDays: number;
+  costNpr: number;
+  previousCycleId: string | null;
+  createdAt: Date;
+}
+
+/**
+ * Return all posting cycles for a job draft, newest first.
+ * Used to display cycle history and lineage.
+ */
+export async function getCycleLineage(jobDraftId: string): Promise<CycleLineageEntry[]> {
+  const rows = await db
+    .select({
+      id: jobPostingCycle.id,
+      status: jobPostingCycle.status,
+      publishedAt: jobPostingCycle.publishedAt,
+      expiresAt: jobPostingCycle.expiresAt,
+      closedAt: jobPostingCycle.closedAt,
+      durationDays: jobPostingCycle.durationDays,
+      costNpr: jobPostingCycle.costNpr,
+      previousCycleId: jobPostingCycle.previousCycleId,
+      createdAt: jobPostingCycle.createdAt,
+    })
+    .from(jobPostingCycle)
+    .where(eq(jobPostingCycle.jobDraftId, jobDraftId))
+    .orderBy(desc(jobPostingCycle.createdAt));
+
+  return rows;
+}
+
+// --- Employer Jobs with Cycles ---
+
+export interface JobWithCycles {
+  jobDraftId: string;
+  title: string;
+  status: string;
+  location: string;
+  employmentType: string;
+  salaryMin: number | null;
+  salaryMax: number | null;
+  currentCycleId: string | null;
+  currentCycleStatus: string | null;
+  currentCycleExpiresAt: Date | null;
+  cycleCount: number;
+}
+
+/**
+ * Return all job drafts for an employer with aggregated cycle info.
+ * Groups by job draft and provides the latest cycle's status/expiry and total cycle count.
+ */
+export async function getEmployerJobsWithCycles(
+  employerProfileId: string,
+): Promise<JobWithCycles[]> {
+  const rows = await db
+    .select({
+      jobDraftId: jobDraft.id,
+      title: jobDraft.title,
+      status: jobDraft.status,
+      location: jobDraft.location,
+      employmentType: jobDraft.employmentType,
+      salaryMin: jobDraft.salaryMin,
+      salaryMax: jobDraft.salaryMax,
+      currentCycleId: jobPostingCycle.id,
+      currentCycleStatus: jobPostingCycle.status,
+      currentCycleExpiresAt: jobPostingCycle.expiresAt,
+      cycleCount: sql<number>`count(${jobPostingCycle.id})::int`,
+    })
+    .from(jobDraft)
+    .leftJoin(jobPostingCycle, eq(jobPostingCycle.jobDraftId, jobDraft.id))
+    .where(eq(jobDraft.employerId, employerProfileId))
+    .groupBy(
+      jobDraft.id,
+      jobDraft.title,
+      jobDraft.status,
+      jobDraft.location,
+      jobDraft.employmentType,
+      jobDraft.salaryMin,
+      jobDraft.salaryMax,
+      jobPostingCycle.id,
+      jobPostingCycle.status,
+      jobPostingCycle.expiresAt,
+    )
+    .orderBy(desc(jobDraft.createdAt));
+
+  // Collapse to one row per draft with the latest active cycle
+  const map = new Map<string, JobWithCycles>();
+
+  for (const row of rows) {
+    const existing = map.get(row.jobDraftId);
+    if (!existing) {
+      map.set(row.jobDraftId, {
+        jobDraftId: row.jobDraftId,
+        title: row.title,
+        status: row.status,
+        location: row.location,
+        employmentType: row.employmentType,
+        salaryMin: row.salaryMin,
+        salaryMax: row.salaryMax,
+        currentCycleId: row.currentCycleId,
+        currentCycleStatus: row.currentCycleStatus,
+        currentCycleExpiresAt: row.currentCycleExpiresAt,
+        cycleCount: row.cycleCount,
+      });
+    } else if (row.currentCycleStatus === "active" && existing.currentCycleStatus !== "active") {
+      // Keep the cycle count from the grouped result (all rows for same draft have same count)
+      // but prefer an active cycle over other statuses
+      existing.currentCycleId = row.currentCycleId;
+      existing.currentCycleStatus = row.currentCycleStatus;
+      existing.currentCycleExpiresAt = row.currentCycleExpiresAt;
+    }
+  }
+
+  return [...map.values()];
 }
