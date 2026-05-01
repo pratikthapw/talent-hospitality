@@ -112,6 +112,24 @@ export const employeeProfile = pgTable(
       .notNull()
       .unique()
       .references(() => user.id, { onDelete: "cascade" }),
+
+    // Required profile fields
+    fullName: text("full_name"),
+    phone: text("phone"),
+    currentLocation: text("current_location"),
+    preferredCategory: varchar("preferred_category", { length: 100 }),
+    experienceLevel: varchar("experience_level", { length: 50 }),
+    skills: json("skills").$type<string[]>().default([]),
+    languages: json("languages").$type<string[]>().default([]),
+    educationSummary: text("education_summary"),
+    workHistorySummary: text("work_history_summary"),
+
+    // Optional profile fields
+    profilePhoto: text("profile_photo"),
+    expectedSalary: integer("expected_salary"),
+    trainingCertificates: json("training_certificates").$type<string[]>().default([]),
+    personalSummary: text("personal_summary"),
+
     verificationStatus: text("verification_status", {
       enum: ["unverified", "pending_review", "verified", "rejected"],
     })
