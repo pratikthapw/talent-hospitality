@@ -151,6 +151,39 @@ export const employeeProfile = pgTable(
   ],
 );
 
+export const cvDocument = pgTable(
+  "cv_document",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    employeeProfileId: text("employee_profile_id")
+      .notNull()
+      .references(() => employeeProfile.id, { onDelete: "cascade" }),
+    sourceType: text("source_type", { enum: ["upload", "builder"] }).notNull(),
+    // Upload-specific fields
+    fileName: text("file_name"),
+    fileUrl: text("file_url"),
+    fileSize: integer("file_size"),
+    mimeType: text("mime_type"),
+    // Builder-specific fields
+    builderContent: json("builder_content").$type<Record<string, unknown>>(),
+    // Status
+    isActive: boolean("is_active").notNull().default(false),
+    replacedAt: timestamp("replaced_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("cv_document_employee_profile_id_idx").on(table.employeeProfileId),
+    index("cv_document_is_active_idx").on(table.isActive),
+    index("cv_document_replaced_at_idx").on(table.replacedAt),
+  ],
+);
+
 export const auditLog = pgTable(
   "audit_log",
   {
@@ -398,7 +431,7 @@ export const userRolesRelations = relations(userRoles, ({ one }) => ({
   }),
 }));
 
-export const employeeProfileRelations = relations(employeeProfile, ({ one }) => ({
+export const employeeProfileRelations = relations(employeeProfile, ({ one, many }) => ({
   user: one(user, {
     fields: [employeeProfile.userId],
     references: [user.id],
@@ -407,6 +440,14 @@ export const employeeProfileRelations = relations(employeeProfile, ({ one }) => 
     fields: [employeeProfile.verifiedBy],
     references: [user.id],
     relationName: "employee_verified_by",
+  }),
+  cvDocuments: many(cvDocument),
+}));
+
+export const cvDocumentRelations = relations(cvDocument, ({ one }) => ({
+  employeeProfile: one(employeeProfile, {
+    fields: [cvDocument.employeeProfileId],
+    references: [employeeProfile.id],
   }),
 }));
 

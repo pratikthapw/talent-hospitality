@@ -15,6 +15,7 @@ import { ProfileForm } from "@/components/profile/profile-form";
 import { auth } from "@/lib/auth";
 import { employeeProfile, userRoles } from "@/lib/auth-schema";
 import { db } from "@/lib/db";
+import { hasActiveCV } from "@/lib/profile/active-cv-manager";
 import {
   checkProfileCompleteness,
   getCompletenessPercentage,
@@ -23,7 +24,9 @@ import type { EmployeeProfileData } from "@/lib/profile/profile-completeness-pol
 
 export const metadata = { title: "My Profile - Employee - THP" };
 
-function buildProfileData(row: typeof employeeProfile.$inferSelect | null): EmployeeProfileData {
+async function buildProfileData(
+  row: typeof employeeProfile.$inferSelect | null,
+): Promise<EmployeeProfileData> {
   if (row === null) {
     return {
       fullName: null,
@@ -38,6 +41,7 @@ function buildProfileData(row: typeof employeeProfile.$inferSelect | null): Empl
       hasActiveCV: false,
     };
   }
+  const cvActive = await hasActiveCV(row.id);
   return {
     fullName: row.fullName,
     phone: row.phone,
@@ -48,7 +52,7 @@ function buildProfileData(row: typeof employeeProfile.$inferSelect | null): Empl
     languages: row.languages,
     educationSummary: row.educationSummary,
     workHistorySummary: row.workHistorySummary,
-    hasActiveCV: false,
+    hasActiveCV: cvActive,
   };
 }
 
@@ -87,7 +91,7 @@ export default async function EmployeeProfilePage() {
   const profile = profiles.length > 0 ? profiles[0] : null;
 
   // Completeness check
-  const profileData = buildProfileData(profile);
+  const profileData = await buildProfileData(profile);
   const completeness = checkProfileCompleteness(profileData);
   const completenessPct = getCompletenessPercentage(completeness);
 
