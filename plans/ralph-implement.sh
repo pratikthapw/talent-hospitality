@@ -266,6 +266,14 @@ if [ "$MODE" = "all" ]; then
     for parent in $parents; do
       echo "--- Processing parent #$parent (max $MAX_PER_PARENT iterations) — $(date) ---"
       bash "$0" "$MAX_PER_PARENT" "$parent" "${MODEL_ARGS[@]}" || true
+
+      if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
+        echo "Dirty working tree detected after parent #$parent — committing leftovers..."
+        git add -A
+        git commit -m "chore: dirty cleanup after parent #$parent" --allow-empty 2>/dev/null || true
+        git push origin "$(git branch --show-current)" 2>/dev/null || true
+      fi
+
       echo "--- Finished parent #$parent — $(date) ---"
       echo ""
     done
