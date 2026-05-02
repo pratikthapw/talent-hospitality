@@ -118,12 +118,14 @@ export function CVBuilder({ onCVChange }: CVBuilderProps) {
     const content: BuilderContent = {
       summary: summary.trim(),
       workExperience: workExperience.map((w) => ({
+        ...w,
         title: w.title.trim(),
         company: w.company.trim(),
         dates: w.dates.trim(),
         description: w.description.trim(),
       })),
       education: education.map((ed) => ({
+        ...ed,
         degree: ed.degree.trim(),
         institution: ed.institution.trim(),
         year: ed.year.trim(),

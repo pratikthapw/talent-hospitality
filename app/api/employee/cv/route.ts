@@ -184,9 +184,10 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const _ = (await request.json()) as Record<string, unknown>;
+    const body = (await request.json()) as Record<string, unknown>;
+    const cvId = body.cvId;
 
-    if (cvId === undefined || cvId.trim() === "") {
+    if (cvId === undefined || cvId === null || typeof cvId !== "string" || cvId.trim() === "") {
       return NextResponse.json({ error: "cvId is required." }, { status: 400 });
     }
 

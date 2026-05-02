@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
 
     const profile = await buildProfileData(rows[0]);
     const completeness = checkProfileCompleteness(profile);
-    const percentage = getCompletenessPercentage(profile);
+    const percentage = getCompletenessPercentage(completeness);
 
     return NextResponse.json({
       profile,
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
         .limit(1);
       const profile = await buildProfileData(inserted[0]);
       const completeness = checkProfileCompleteness(profile);
-      const percentage = getCompletenessPercentage(profile);
+      const percentage = getCompletenessPercentage(completeness);
 
       return NextResponse.json(
         {
@@ -215,7 +215,7 @@ export async function POST(request: NextRequest) {
 
     const profile = await buildProfileData(updated[0]);
     const completeness = checkProfileCompleteness(profile);
-    const percentage = getCompletenessPercentage(profile);
+    const percentage = getCompletenessPercentage(completeness);
 
     return NextResponse.json({
       profile,

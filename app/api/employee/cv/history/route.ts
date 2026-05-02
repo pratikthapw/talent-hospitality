@@ -34,6 +34,7 @@ async function getEmployeeProfileId(userId: string): Promise<string | null> {
 function getRetentionStatus(cv: {
   isActive: boolean;
   replacedAt: Date | null;
+  retentionExpiresAt: Date | null;
 }): "active" | "retained" | "expired" | "inactive" {
   if (cv.isActive) {
     return "active";

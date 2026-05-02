@@ -20,8 +20,6 @@ interface SearchVisibilityToggleProps {
   explanation: string;
 }
 
-type VerificationStatus = "unverified" | "pending_review" | "verified" | "rejected";
-
 const STATUS_BADGE: Record<
   string,
   { label: string; classes: string; icon: typeof CheckmarkCircle01Icon }
@@ -48,6 +46,50 @@ const STATUS_BADGE: Record<
   },
 };
 
+function ToggleSwitch({
+  checked,
+  disabled,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  disabled: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label htmlFor="search-visibility-toggle" className="flex cursor-pointer items-center gap-3">
+      <span className="relative inline-flex h-6 w-11 shrink-0">
+        <input
+          id="search-visibility-toggle"
+          type="checkbox"
+          className="peer sr-only"
+          checked={checked}
+          disabled={disabled}
+          onChange={(e) => {
+            onChange(e.target.checked);
+          }}
+        />
+        <span
+          className={cn(
+            "inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
+            checked ? "bg-primary" : "bg-muted",
+            disabled && "opacity-50",
+          )}
+        >
+          <span
+            className={cn(
+              "inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
+              checked ? "translate-x-6" : "translate-x-1",
+            )}
+          />
+        </span>
+      </span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
+    </label>
+  );
+}
+
 export function SearchVisibilityToggle({
   searchVisible: initialVisible,
   verificationStatus: initialStatus,
@@ -55,7 +97,7 @@ export function SearchVisibilityToggle({
   explanation: initialExplanation,
 }: SearchVisibilityToggleProps) {
   const [searchVisible, setSearchVisible] = useState(initialVisible);
-  const [verificationStatus] = useState(initialStatus);
+  const [verificationStatus, setVerificationStatus] = useState(initialStatus);
   const [explanation, setExplanation] = useState(initialExplanation);
   const [isEligible, setIsEligible] = useState(initialEligible);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,21 +117,29 @@ export function SearchVisibilityToggle({
       });
 
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        setError(data.error ?? "Something went wrong. Please try again.");
+        const raw: unknown = await res.json();
+        const msg =
+          typeof raw === "object" && raw !== null && "error" in raw
+            ? String((raw as Record<string, unknown>).error)
+            : "Something went wrong. Please try again.";
+        setError(msg);
         return;
       }
 
-      const data = (await res.json()) as {
-        searchVisible: boolean;
-        verificationStatus: string;
-        isEligible: boolean;
-        explanation: string;
-      };
+      const raw: unknown = await res.json();
+      const data =
+        typeof raw === "object" && raw !== null && "searchVisible" in raw
+          ? (raw as Record<string, unknown>)
+          : ({} as Record<string, unknown>);
 
-      setSearchVisible(data.searchVisible);
-      setExplanation(data.explanation);
-      setIsEligible(data.isEligible);
+      setSearchVisible(Boolean(data.searchVisible));
+      setExplanation(
+        typeof data.explanation === "string" ? data.explanation : JSON.stringify(data.explanation),
+      );
+      setIsEligible(Boolean(data.isEligible));
+      if (typeof data.verificationStatus === "string") {
+        setVerificationStatus(data.verificationStatus);
+      }
     } catch {
       setError("Could not reach the server. Please check your connection and try again.");
     } finally {
@@ -97,8 +147,7 @@ export function SearchVisibilityToggle({
     }
   }
 
-  const showVisibilityWarning =
-    searchVisible && verificationStatus !== "verified";
+  const showVisibilityWarning = searchVisible && verificationStatus !== "verified";
 
   return (
     <div className="space-y-6">
@@ -108,54 +157,28 @@ export function SearchVisibilityToggle({
           {/* Title row */}
           <div>
             <div className="flex items-center gap-2">
-              <HugeiconsIcon
-                icon={EyeIcon}
-                className="h-5 w-5 text-primary"
-              />
+              <HugeiconsIcon icon={EyeIcon} className="h-5 w-5 text-primary" />
               <h2 className="text-lg font-semibold text-foreground">
                 Appear in Employer Candidate Search
               </h2>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Let employers discover and reach out to you through candidate search. You can still apply to jobs directly either way.
+              Let employers discover and reach out to you through candidate search. You can still
+              apply to jobs directly either way.
             </p>
           </div>
 
           {/* Toggle + status row */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             {/* Toggle switch */}
-            <label className="flex cursor-pointer items-center gap-3">
-              <span className="relative inline-flex h-6 w-11 shrink-0">
-                <input
-                  type="checkbox"
-                  className="peer sr-only"
-                  checked={searchVisible}
-                  disabled={isLoading}
-                  onChange={(e) => {
-                    void handleToggle(e.target.checked);
-                  }}
-                />
-                <span
-                  className={cn(
-                    "inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200",
-                    searchVisible
-                      ? "bg-primary"
-                      : "bg-muted",
-                    isLoading && "opacity-50",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200",
-                      searchVisible ? "translate-x-6" : "translate-x-1",
-                    )}
-                  />
-                </span>
-              </span>
-              <span className="text-sm font-medium text-foreground">
-                {searchVisible ? "Visible to employers" : "Hidden from employers"}
-              </span>
-            </label>
+            <ToggleSwitch
+              checked={searchVisible}
+              disabled={isLoading}
+              onChange={(v) => {
+                void handleToggle(v);
+              }}
+              label={searchVisible ? "Visible to employers" : "Hidden from employers"}
+            />
 
             {/* Verification status badge */}
             <span
@@ -200,7 +223,9 @@ export function SearchVisibilityToggle({
                 Your profile remains hidden
               </h3>
               <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                Even with visibility enabled, employers won&apos;t find you in candidate search until your profile is verified. Verification is required before you can appear in search results.
+                Even with visibility enabled, employers won&apos;t find you in candidate search
+                until your profile is verified. Verification is required before you can appear in
+                search results.
               </p>
             </div>
           </div>
@@ -220,18 +245,14 @@ export function SearchVisibilityToggle({
           <div
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-full",
-              isEligible
-                ? "bg-green-100 dark:bg-green-900/60"
-                : "bg-muted",
+              isEligible ? "bg-green-100 dark:bg-green-900/60" : "bg-muted",
             )}
           >
             <HugeiconsIcon
               icon={isEligible ? CheckmarkCircle01Icon : Cancel01Icon}
               className={cn(
                 "h-4 w-4",
-                isEligible
-                  ? "text-green-600 dark:text-green-400"
-                  : "text-muted-foreground",
+                isEligible ? "text-green-600 dark:text-green-400" : "text-muted-foreground",
               )}
             />
           </div>
@@ -239,21 +260,15 @@ export function SearchVisibilityToggle({
             <h3
               className={cn(
                 "text-sm font-semibold",
-                isEligible
-                  ? "text-green-800 dark:text-green-200"
-                  : "text-foreground",
+                isEligible ? "text-green-800 dark:text-green-200" : "text-foreground",
               )}
             >
-              {isEligible
-                ? "You appear in candidate search"
-                : "Not appearing in candidate search"}
+              {isEligible ? "You appear in candidate search" : "Not appearing in candidate search"}
             </h3>
             <p
               className={cn(
                 "mt-0.5 text-xs",
-                isEligible
-                  ? "text-green-700 dark:text-green-300"
-                  : "text-muted-foreground",
+                isEligible ? "text-green-700 dark:text-green-300" : "text-muted-foreground",
               )}
             >
               {isEligible

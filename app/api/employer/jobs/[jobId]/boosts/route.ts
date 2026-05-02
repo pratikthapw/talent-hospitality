@@ -31,10 +31,10 @@ function isValidBoostType(value: string): value is BoostType {
 }
 
 function isValidBoostDuration(value: number): value is BoostDurationDays {
-  return BOOST_DURATION_OPTIONS.includes(value);
+  return (BOOST_DURATION_OPTIONS as readonly number[]).includes(value);
 }
 
-async function getStatusCodeForError(error: string | undefined): number {
+function getStatusCodeForError(error: string | undefined): number {
   if (error === undefined || error === "") {
     return 400;
   }
@@ -105,7 +105,7 @@ async function handleBoostPurchase(
   );
 }
 
-async function validateBoostRequest(body: BoostRequestBody): NextResponse | null {
+function validateBoostRequest(body: BoostRequestBody): NextResponse | null {
   const { boostType, durationDays } = body;
 
   if (!isValidBoostType(boostType)) {
