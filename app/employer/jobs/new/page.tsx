@@ -52,17 +52,17 @@ export default async function CreateJobDraftPage() {
           </p>
         </div>
 
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm dark:border-amber-900 dark:bg-amber-950/50">
-          <h2 className="mb-2 text-lg font-semibold text-amber-800 dark:text-amber-200">
+        <div className="rounded-lg border border-border bg-muted p-6 shadow-sm">
+          <h2 className="mb-2 text-lg font-semibold text-foreground">
             Employer Verification Required
           </h2>
-          <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">
+          <p className="mb-4 text-sm text-muted-foreground">
             {statusMessages[employer.verificationStatus as string] ??
               "You need to complete Employer Verification before creating job drafts."}
           </p>
           <Link
             href="/employer/settings/verification"
-            className="inline-flex items-center text-sm font-medium text-amber-800 underline underline-offset-4 hover:text-amber-900 dark:text-amber-200 dark:hover:text-amber-100"
+            className="inline-flex items-center text-sm font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground"
           >
             View Verification Status
           </Link>

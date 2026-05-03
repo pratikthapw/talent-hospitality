@@ -121,38 +121,30 @@ export default async function EmployeeProfilePage() {
 
       {/* Readiness status card */}
       {completeness.isReadyToApply ? (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-6 shadow-sm dark:border-green-900 dark:bg-green-950/50">
+        <div className="rounded-lg border border-primary/30 bg-primary/10 p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/60">
-              <HugeiconsIcon
-                icon={CheckmarkCircle01Icon}
-                className="h-5 w-5 text-green-600 dark:text-green-400"
-              />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-green-800 dark:text-green-200">
-                You&apos;re Ready to Apply!
-              </h2>
-              <p className="mt-0.5 text-sm text-green-700 dark:text-green-300">
+              <h2 className="text-lg font-semibold text-foreground">You&apos;re Ready to Apply!</h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Your profile is complete. Employers can now see your full profile when you apply.
               </p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 shadow-sm dark:border-amber-900 dark:bg-amber-950/50">
+        <div className="rounded-lg border border-border bg-muted p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/60">
-              <HugeiconsIcon
-                icon={Cancel01Icon}
-                className="h-5 w-5 text-amber-600 dark:text-amber-400"
-              />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+              <HugeiconsIcon icon={Cancel01Icon} className="h-5 w-5 text-chart-3" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-amber-800 dark:text-amber-200">
+              <h2 className="text-lg font-semibold text-foreground">
                 Complete Your Profile to Apply
               </h2>
-              <p className="mt-0.5 text-sm text-amber-700 dark:text-amber-300">
+              <p className="mt-0.5 text-sm text-muted-foreground">
                 Fill in all required fields below to unlock job applications.
               </p>
             </div>
@@ -161,16 +153,14 @@ export default async function EmployeeProfilePage() {
           {/* Progress bar */}
           <div className="mt-5">
             <div className="mb-1.5 flex items-center justify-between text-sm">
-              <span className="font-medium text-amber-800 dark:text-amber-200">
+              <span className="font-medium text-foreground">
                 {completeness.completedCount} of {completeness.totalRequired} required fields
               </span>
-              <span className="font-semibold text-amber-900 dark:text-amber-100">
-                {completenessPct}%
-              </span>
+              <span className="font-semibold text-foreground">{completenessPct}%</span>
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-amber-200 dark:bg-amber-900">
+            <div className="h-2.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-amber-500 transition-all duration-300 dark:bg-amber-400"
+                className="h-full rounded-full bg-chart-3 transition-all duration-300"
                 style={{ width: `${completenessPct}%` }}
               />
             </div>
@@ -181,12 +171,10 @@ export default async function EmployeeProfilePage() {
             <ul className="mt-4 space-y-2">
               {completeness.missingFields.map((field) => (
                 <li key={field.field} className="flex items-start gap-2 text-sm">
-                  <span className="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 dark:bg-amber-400" />
+                  <span className="mt-0.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-chart-3" />
                   <span>
-                    <span className="font-medium text-amber-800 dark:text-amber-200">
-                      {field.label}
-                    </span>
-                    <span className="text-amber-700 dark:text-amber-300"> — {field.hint}</span>
+                    <span className="font-medium text-foreground">{field.label}</span>
+                    <span className="text-muted-foreground"> — {field.hint}</span>
                   </span>
                 </li>
               ))}

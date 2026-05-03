@@ -82,14 +82,14 @@ export function EditJobHandler({ jobId, currentStatus, initialData }: EditJobHan
 
       {/* Error display */}
       {error !== null && (
-        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       {/* Success display */}
       {successMessage !== null && (
-        <div className="rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950/50 dark:text-green-300">
+        <div className="rounded-md border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
           {successMessage}
         </div>
       )}

@@ -31,15 +31,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_BADGE: Record<string, string> = {
   draft:
-    "inline-flex items-center rounded-sm bg-accent-blue px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-on-dark",
+    "inline-flex items-center rounded-sm bg-chart-5 px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-primary-foreground",
   published:
-    "inline-flex items-center rounded-sm bg-brand-green px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-on-primary",
+    "inline-flex items-center rounded-sm bg-primary px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-primary-foreground",
   paused:
-    "inline-flex items-center rounded-sm bg-accent-orange px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-on-dark",
+    "inline-flex items-center rounded-sm bg-chart-3 px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-primary-foreground",
   closed:
-    "inline-flex items-center rounded-sm bg-hairline-strong px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-ink",
+    "inline-flex items-center rounded-sm bg-secondary px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-foreground",
   expired:
-    "inline-flex items-center rounded-sm bg-hairline-soft px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-slate",
+    "inline-flex items-center rounded-sm bg-muted px-[8px] py-[2px] text-[11px] font-semibold tracking-[1px] uppercase text-muted-foreground",
 };
 
 const EMPLOYMENT_TYPE_LABEL: Record<string, string> = {
@@ -112,13 +112,13 @@ export default async function EmployerJobsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-canvas font-sans selection:bg-brand-green/30">
+    <div className="min-h-screen bg-background font-sans selection:bg-primary/30">
       {/* Header Area */}
-      <section className="text-on-dark bg-brand-teal-deep px-6 py-12 md:px-12 lg:px-24">
+      <section className="bg-foreground px-6 py-12 text-background md:px-12 lg:px-24">
         <div className="mx-auto max-w-5xl">
           <Link
             href="/employer"
-            className="mb-8 inline-flex items-center text-[14px] font-medium text-brand-green hover:underline"
+            className="mb-8 inline-flex items-center text-[14px] font-medium text-primary hover:underline"
           >
             <HugeiconsIcon icon={ArrowLeft02Icon} className="mr-1.5 h-4 w-4" />
             Back to Dashboard
@@ -126,14 +126,14 @@ export default async function EmployerJobsPage() {
 
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-teal-mid text-brand-green">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-primary">
                 <HugeiconsIcon icon={Briefcase02Icon} className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-[36px] leading-[1.25] font-medium tracking-[-0.5px] lg:text-[48px] lg:leading-[1.20]">
                   My Jobs
                 </h1>
-                <p className="text-on-dark-muted mt-1 text-[16px]">
+                <p className="mt-1 text-[16px] text-muted-foreground">
                   Manage your job listings and posting cycles.
                 </p>
               </div>
@@ -152,12 +152,12 @@ export default async function EmployerJobsPage() {
       {/* Main Canvas */}
       <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
         {jobs.length === 0 ? (
-          <div className="rounded-[12px] border-[1px] border-hairline bg-surface p-[48px] text-center">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-hairline-soft">
-              <HugeiconsIcon icon={Briefcase02Icon} className="h-8 w-8 text-stone" />
+          <div className="rounded-[12px] border border-border bg-card p-[48px] text-center">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+              <HugeiconsIcon icon={Briefcase02Icon} className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h2 className="mb-2 text-[22px] font-medium text-ink">No jobs yet</h2>
-            <p className="mb-8 text-[16px] text-steel">
+            <h2 className="mb-2 text-[22px] font-medium text-foreground">No jobs yet</h2>
+            <p className="mb-8 text-[16px] text-muted-foreground">
               Create your first job listing to start hiring talent.
             </p>
             <Link href="/employer/jobs/new">
@@ -174,12 +174,12 @@ export default async function EmployerJobsPage() {
               return (
                 <div
                   key={job.jobDraftId}
-                  className="rounded-[12px] border-[1px] border-hairline bg-canvas p-[24px] shadow-[0_1px_2px_rgba(0,30,43,0.04)] transition-shadow duration-200 hover:shadow-[0_4px_12px_rgba(0,30,43,0.08)]"
+                  className="rounded-[12px] border border-border bg-background p-[24px] shadow-sm transition-shadow duration-200 hover:shadow-md"
                 >
                   <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center gap-3">
-                        <h2 className="text-[22px] leading-[1.35] font-medium text-ink">
+                        <h2 className="text-[22px] leading-[1.35] font-medium text-foreground">
                           {job.title}
                         </h2>
                         <span className={badgeClasses}>
@@ -187,21 +187,24 @@ export default async function EmployerJobsPage() {
                         </span>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[14px] text-steel">
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[14px] text-muted-foreground">
                         {job.location && (
                           <span className="flex items-center gap-1.5">
-                            <HugeiconsIcon icon={Location01Icon} className="h-4 w-4 text-stone" />
+                            <HugeiconsIcon
+                              icon={Location01Icon}
+                              className="h-4 w-4 text-muted-foreground"
+                            />
                             {job.location}
                           </span>
                         )}
                         {job.employmentType && (
                           <span className="flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-brand-green-mid" />
+                            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                             {EMPLOYMENT_TYPE_LABEL[job.employmentType] ?? job.employmentType}
                           </span>
                         )}
                         {formatSalary(job.salaryMin, job.salaryMax, null, null) !== null && (
-                          <span className="font-medium text-brand-teal">
+                          <span className="font-medium text-accent-foreground">
                             {formatSalary(job.salaryMin, job.salaryMax, null, null)}
                           </span>
                         )}
@@ -210,7 +213,7 @@ export default async function EmployerJobsPage() {
 
                     <div className="flex items-center gap-3 md:flex-col md:items-end md:gap-2">
                       {job.cycleCount > 0 && (
-                        <span className="inline-flex items-center rounded-full border-[1px] border-hairline-soft bg-surface-soft px-[10px] py-[4px] text-[13px] font-semibold text-slate">
+                        <span className="inline-flex items-center rounded-full border border-border bg-secondary px-[10px] py-[4px] text-[13px] font-semibold text-muted-foreground">
                           {job.cycleCount} {job.cycleCount === 1 ? "cycle" : "cycles"}
                         </span>
                       )}
@@ -230,8 +233,8 @@ export default async function EmployerJobsPage() {
                   </div>
 
                   {job.currentCycleStatus === "active" && expiryDate !== null && (
-                    <div className="mt-6 flex items-center gap-2 rounded-[8px] border-[1px] border-brand-green-soft bg-surface-feature p-[12px] text-[14px] text-brand-green-dark">
-                      <span className="flex h-2 w-2 animate-pulse rounded-full bg-brand-green" />
+                    <div className="mt-6 flex items-center gap-2 rounded-[8px] border border-accent bg-accent p-[12px] text-[14px] text-primary-foreground">
+                      <span className="flex h-2 w-2 animate-pulse rounded-full bg-primary" />
                       <span>
                         Expires on <strong>{expiryDate}</strong>
                       </span>
@@ -239,7 +242,7 @@ export default async function EmployerJobsPage() {
                   )}
 
                   {cycles.length > 0 && (
-                    <div className="mt-8 border-t-[1px] border-hairline-soft pt-6">
+                    <div className="mt-8 border-t border-border pt-6">
                       <JobCycleHistory
                         cycles={cycles}
                         jobTitle={job.title}

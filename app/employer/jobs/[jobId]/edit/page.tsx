@@ -19,9 +19,9 @@ export const metadata = {
 
 const STATUS_BADGE: Record<string, string> = {
   published:
-    "inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/50 dark:text-green-300",
+    "inline-flex items-center rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary",
   paused:
-    "inline-flex items-center rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/50 dark:text-amber-300",
+    "inline-flex items-center rounded-full bg-chart-3/15 px-2.5 py-0.5 text-xs font-medium text-chart-3",
 };
 
 const STATUS_LABEL: Record<string, string> = {

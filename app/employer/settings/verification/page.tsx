@@ -20,22 +20,19 @@ const STATUS_CONFIG: Record<
     label: "Pending Review",
     description:
       "Your Employer Profile is under review by the THP team. You will be notified once Employer Verification is complete.",
-    badgeClass:
-      "bg-amber-100 text-amber-800 ring-amber-600/20 dark:bg-amber-900/20 dark:text-amber-300 dark:ring-amber-400/20",
+    badgeClass: "bg-muted text-muted-foreground ring-ring/20",
   },
   verified: {
     label: "Verified",
     description:
       "Your Employer Profile has been verified. You can now publish jobs and access paid features on the platform.",
-    badgeClass:
-      "bg-emerald-100 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-900/20 dark:text-emerald-300 dark:ring-emerald-400/20",
+    badgeClass: "bg-primary/15 text-primary ring-primary/20",
   },
   rejected: {
     label: "Rejected",
     description:
       "Your Employer Verification was not approved at this time. Review the notes below for more information and contact support if you have questions.",
-    badgeClass:
-      "bg-red-100 text-red-800 ring-red-600/20 dark:bg-red-900/20 dark:text-red-300 dark:ring-red-400/20",
+    badgeClass: "bg-destructive/15 text-destructive ring-destructive/20",
   },
 };
 
@@ -128,8 +125,8 @@ export default async function EmployerVerificationPage() {
         )}
 
         {status === "pending_review" && (
-          <div className="mt-4 rounded-md bg-amber-50 p-3 dark:bg-amber-950/30">
-            <p className="text-xs text-amber-800 dark:text-amber-300">
+          <div className="mt-4 rounded-md bg-muted p-3">
+            <p className="text-xs text-muted-foreground">
               Your Employer Profile is currently being reviewed. This typically takes 1-2 business
               days. You do not need to take any action at this stage.
             </p>

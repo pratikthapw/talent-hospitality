@@ -63,8 +63,8 @@ export default async function CVHistoryPage() {
       </div>
 
       {/* Retention Notice */}
-      <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/50">
-        <p className="text-sm text-blue-800 dark:text-blue-200">
+      <div className="rounded-lg border border-chart-5/30 bg-chart-5/10 p-4">
+        <p className="text-sm text-chart-5">
           <strong>CV Retention Window:</strong> When you replace your active CV, the previous
           version is retained for 60 days. During this period, employers who previously unlocked
           your profile can still access the older CV. After 60 days, retained CVs are permanently

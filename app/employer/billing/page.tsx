@@ -38,7 +38,7 @@ function EntitlementList({ entitlements }: { entitlements: PlanEntitlement }) {
         .filter((i) => i.visible)
         .map((item) => (
           <li key={item.label} className="flex items-center text-foreground">
-            <HugeiconsIcon icon={Tick01Icon} className="mr-2 h-4 w-4 shrink-0 text-green-500" />
+            <HugeiconsIcon icon={Tick01Icon} className="mr-2 h-4 w-4 shrink-0 text-primary" />
             {item.label}
           </li>
         ))}
@@ -100,7 +100,7 @@ export default async function BillingPage() {
           <div>
             <div className="mb-2 flex items-center gap-3">
               <span className="text-2xl font-bold">{currentPlan.displayName} Plan</span>
-              <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800 dark:bg-green-900 dark:text-green-200">
+              <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
                 Active
               </span>
             </div>
