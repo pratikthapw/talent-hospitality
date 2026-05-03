@@ -18,17 +18,19 @@ export default function Page() {
   const [language, setLanguage] = useState<Language>("en");
 
   return (
-    <main className="w-full">
+    <div className="flex min-h-screen flex-col bg-background text-foreground selection:bg-primary/30">
       <Navigation language={language} onLanguageChange={setLanguage} />
-      <Hero language={language} />
-      <HowItWorks language={language} />
-      <FeaturesGrid language={language} />
-      <JobCategories language={language} />
-      <SpotlightJobs language={language} />
-      <CTASection language={language} />
-      <Testimonials language={language} />
-      <PricingTeaser language={language} />
+      <main className="flex w-full flex-1 flex-col items-center justify-center overflow-hidden">
+        <Hero language={language} />
+        <HowItWorks language={language} />
+        <FeaturesGrid language={language} />
+        <JobCategories language={language} />
+        <SpotlightJobs language={language} />
+        <Testimonials language={language} />
+        <PricingTeaser language={language} />
+        <CTASection language={language} />
+      </main>
       <Footer language={language} />
-    </main>
+    </div>
   );
 }

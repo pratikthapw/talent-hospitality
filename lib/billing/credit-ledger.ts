@@ -1,10 +1,10 @@
 import "server-only";
 import { eq, desc, and } from "drizzle-orm";
-import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 
 import { creditLedger, creditWallet } from "../auth-schema";
-import type * as schema from "../auth-schema";
 import { db } from "../db";
+
+type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export type CreditSourceType =
   | "signup_grant"
@@ -132,7 +132,7 @@ export async function getSubscriptionGrantHistory(
  * Uses the wallet row-lock pattern for concurrent safety.
  */
 export async function deductCredits(
-  tx: NodePgDatabase<typeof schema>,
+  tx: DbTransaction,
   params: {
     employerProfileId: string;
     amountNpr: number;
